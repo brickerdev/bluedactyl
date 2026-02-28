@@ -1,15 +1,14 @@
-import { useStoreState } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { Formik } from 'formik';
-import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { object, string } from 'yup';
 
-import LoginFormContainer from '@/components/auth/LoginFormContainer';
-import Button from '@/components/elements/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import Captcha, { getCaptchaResponse } from '@/components/elements/Captcha';
-import ContentBox from '@/components/elements/ContentBox';
-import Field from '@/components/elements/Field';
 
 import CaptchaManager from '@/lib/captcha';
 
@@ -17,8 +16,6 @@ import { httpErrorToHuman } from '@/api/http';
 import http from '@/api/http';
 
 import useFlash from '@/plugins/useFlash';
-
-import Logo from '../elements/PyroLogo';
 
 interface Values {
     email: string;
@@ -56,67 +53,86 @@ const ForgotPasswordContainer = () => {
     };
 
     return (
-        <ContentBox>
-            <Formik
-                onSubmit={handleSubmission}
-                initialValues={{ email: '' }}
-                validationSchema={object().shape({
-                    email: string().email('Enter a valid email address.').required('Email is required.'),
-                })}
-            >
-                {({ isSubmitting }) => (
-                    <LoginFormContainer className={`w-full flex`}>
-                        <Link to='/'>
-                            <div className='flex h-12 mb-4 items-center w-full'>
-                                <Logo />
-                            </div>
-                        </Link>
-                        <div aria-hidden className='my-8 bg-[#ffffff33] min-h-[1px]'></div>
-                        <h2 className='text-xl font-extrabold mb-2'>Reset Password</h2>
-                        <div className='text-sm mb-6'>
-                            We&apos;ll send you an email with a link to reset your password.
-                        </div>
-                        <Field id='email' label={'Email'} name={'email'} type={'email'} />
+        <div className="w-full max-w-md mx-auto flex flex-col gap-6 px-6 py-8">
+            <Card className="w-full max-w-md mx-auto rounded-2xl shadow-2xl bg-accent-foreground">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-3xl font-extrabold text-center text-[--color-white]">
+                        Reset Password
+                    </CardTitle>
+                    <CardDescription className="text-center text-[--color-gray-300]">
+                        We'll send you an email with a link to reset your password.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Formik
+                        onSubmit={handleSubmission}
+                        initialValues={{ email: '' }}
+                        validationSchema={object().shape({
+                            email: string().email('Enter a valid email address.').required('Email is required.'),
+                        })}
+                    >
+                        {({ values, handleChange, handleBlur, handleSubmit, isSubmitting, errors, touched }) => (
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-[--color-white]">
+                                        Email
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        value={values.email}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        placeholder="Enter your email"
+                                        className={`h-10 rounded-lg bg-[--color-background]/80 text-[--color-white] placeholder:text-[--color-gray-400] border ${errors.email && touched.email ? 'border-[--color-red-500]' : 'border-[--color-gray-500]'} focus-visible:ring-2 focus-visible:ring-[--color-brand] focus-visible:border-[--color-brand] transition-colors`}
+                                    />
+                                    {errors.email && touched.email && (
+                                        <p className="text-sm text-[--color-red-500]">{errors.email}</p>
+                                    )}
+                                </div>
 
-                        <Captcha
-                            className='mt-6'
-                            onError={(error) => {
-                                console.error('Captcha error:', error);
-                                addFlash({
-                                    type: 'error',
-                                    title: 'Error',
-                                    message: 'Captcha verification failed. Please try again.',
-                                });
-                            }}
-                        />
+                                <Captcha
+                                    onError={(error) => {
+                                        console.error('Captcha error:', error);
+                                        addFlash({
+                                            type: 'error',
+                                            title: 'Error',
+                                            message: 'Captcha verification failed. Please try again.',
+                                        });
+                                    }}
+                                />
 
-                        <div className='mt-6'>
-                            <Button
-                                className={`w-full mt-4 rounded-full bg-brand border-0 ring-0 outline-hidden capitalize font-bold text-sm py-2`}
-                                type='submit'
-                                size='xlarge'
-                                isLoading={isSubmitting}
-                                disabled={isSubmitting}
-                            >
-                                Send Email
-                            </Button>
-                        </div>
+                                <Button
+                                    type="submit"
+                                    className="w-full rounded-full"
+                                    size="icon"
+                                    variant="secondary"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Sending...' : 'Send Email'}
+                                </Button>
+                            </form>
+                        )}
+                    </Formik>
+                </CardContent>
 
-                        <div aria-hidden className='my-8 bg-[#ffffff33] min-h-[1px]'></div>
-                        <div
-                            className={`text-center w-full rounded-lg border-0 ring-0 outline-hidden capitalize font-bold text-sm py-2 `}
+                <CardFooter>
+                    <Link
+                        to="/"
+                        className="w-full"
+                    >
+                        <Button
+                            className="w-full rounded-full mt-2"
+                            size="default"
                         >
-                            <Link
-                                to='/auth/login'
-                                className='block w-full text-center py-2.5 px-4 text-xs font-medium tracking-wide uppercase text-white hover:text-white/80 transition-colors duration-200 border border-white/20 rounded-full hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30'
-                            >
-                                Return to Login
-                            </Link>
-                        </div>
-                    </LoginFormContainer>
-                )}
-            </Formik>
-        </ContentBox>
+                            Back to Home
+                        </Button>
+                    </Link>
+                </CardFooter>
+            </Card>
+        </div>
     );
 };
 

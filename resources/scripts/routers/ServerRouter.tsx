@@ -277,7 +277,7 @@ const ServerRouter = () => {
 
                     <div className='flex flex-row w-full lg:pt-0 pt-16'>
                         {/* Desktop Sidebar */}
-                        <MainSidebar className='hidden lg:flex lg:relative lg:shrink-0 w-[300px] bg-[#1a1a1a] flex flex-col h-screen'>
+                        <MainSidebar className='hidden lg:flex lg:relative lg:shrink-0 w-[300px] bg-[#1a1a1a] flex-col h-screen'>
                             <div className='flex flex-row items-center justify-between h-8'>
                                 <NavLink to={'/'} className='flex shrink-0 h-8 w-fit'>
                                     <Logo uniqueId='server-desktop-sidebar' />
@@ -325,8 +325,8 @@ const ServerRouter = () => {
                             <ul
                                 ref={navContainerRef}
                                 onScroll={handleScroll}
-                                data-pyro-subnav-routes-wrapper=''
-                                className='pyro-subnav-routes-wrapper flex-grow overflow-y-auto'
+                                data-blue-subnav-routes-wrapper=''
+                                className='blue-subnav-routes-wrapper flex-grow overflow-y-auto'
                             >
                                 {/* Dynamic navigation items from routes config */}
                                 {navRoutes.map((route) => (
@@ -335,7 +335,7 @@ const ServerRouter = () => {
                                         ref={getRefForRoute(route)}
                                         route={route}
                                         serverId={id}
-                                        onClick={() => {}}
+                                        onClick={() => { }}
                                     />
                                 ))}
                             </ul>
@@ -356,8 +356,8 @@ const ServerRouter = () => {
                             <TransferListener />
                             <WebsocketHandler />
                             <main
-                                data-pyro-main=''
-                                data-pyro-transitionrouter=''
+                                data-blue-main=''
+                                data-blue-transitionrouter=''
                                 className='relative inset-[1px] w-full h-full overflow-y-auto overflow-x-hidden rounded-md bg-[#08080875]'
                             >
                                 {inConflictState &&

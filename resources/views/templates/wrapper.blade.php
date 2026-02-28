@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- Copyright (c) 2023-2025 Pyro Inc., parent collaborators, and contributors -->
-<html data-pyro-html lang="en" style="background-color: #000000; height: 100%; width: 100%; margin: 0; padding: 0;">
+<!-- Copyright (c) 2023-2025 Blue Inc., parent collaborators, and contributors -->
+<html data-blue-html lang="en" style="height: 100%; width: 100%; margin: 0; padding: 0;">
     <head>
         <title>{{ config('app.name', 'Panel') }}</title>
 
@@ -15,11 +15,9 @@
             <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
             <link rel="shortcut icon" href="/favicons/favicon.ico" />
             <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-            <meta name="apple-mobile-web-app-title" content="Pyrodactyl" />
+            <meta name="apple-mobile-web-app-title" content="Bluedactyl" />
             <link rel="manifest" href="/favicons/site.webmanifest" />
 
-            <meta name="theme-color" content="#000000">
-            <meta name="darkreader-lock">
         @show
 
         @section('user-data')
@@ -34,9 +32,6 @@
                 </script>
             @endif
         @show
-        <style>
-            @import url('https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap')
-        </style>
 
         @yield('assets')
 
@@ -45,7 +40,7 @@
         @viteReactRefresh
         @vite('resources/scripts/index.tsx')
     </head>
-    <body data-pyro-body class="{{ $css['body'] }}" style="background-color: #000000; height: 100%; width: 100%; margin: 0; padding: 0;">
+    <body data-blue-body style="height: 100%; width: 100%; margin: 0; padding: 0;">
         @section('content')
             @yield('above-container')
             @yield('container')

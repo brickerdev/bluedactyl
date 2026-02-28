@@ -1,18 +1,18 @@
 {
-    "name": "pyrodactyl-oss/pyrodactyl",
-    "description": "Pyrodactyl is the Pterodactyl-based game server panel that's faster, smaller, safer, and more accessible.",
+    "name": "bluedactyl-oss/bluedactyl",
+    "description": "Bluedactyl is the Pterodactyl-based game server panel that's faster, smaller, safer, and more accessible.",
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "Pyrodactyl-Oss",
-            "email": "me@pyrodactyl.dev",
-            "homepage": "https://pyrodactyl.dev",
+            "name": "Bluedactyl-Oss",
+            "email": "me@bluedactyl.dev",
+            "homepage": "https://bluedactyl.dev",
             "role": "Maintainer"
         },
         {
-            "name": "Pyro,  Inc.",
-            "email": "team@pyro.host",
-            "homepage": "https://pyro.host",
+            "name": "Blue,  Inc.",
+            "email": "team@blue.host",
+            "homepage": "https://blue.host",
             "role": "Former Maintainer"
         }
     ],
@@ -72,7 +72,7 @@
         ],
         "psr-4": {
             "Pterodactyl\\": "app/",
-            "Pyrodactyl\\": "app/",
+            "Bluedactyl\\": "app/",
             "Database\\Factories\\": "database/Factories/",
             "Database\\Seeders\\": "database/Seeders/"
         }
@@ -80,7 +80,7 @@
     "autoload-dev": {
         "psr-4": {
             "Pterodactyl\\Tests\\": "tests/",
-            "Pyrodactyl\\Tests\\": "tests/"
+            "Bluedactyl\\Tests\\": "tests/"
         }
     },
     "scripts": {

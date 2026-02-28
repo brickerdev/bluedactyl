@@ -4,5 +4,13 @@
     "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
-    }
+    },
+    "files.associations": {
+        "*.blade.php": "blade"
+    },
+    "emmet.includeLanguages": {
+        "blade": "html"
+    },
+    "blade.format.enable": true,
+    "i18n-ally.localesPaths": ["resources/lang"]
 }

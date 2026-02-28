@@ -133,7 +133,7 @@ fi
     export POSTGRES_PASSWORD=$(grep "POSTGRES_PASSWORD" docker-compose.yml | awk '{print $2}')
     export POSTGRES_USER=$(grep "POSTGRES_USER" docker-compose.yml | awk '{print $2}')
 
-    php artisan p:user:make -n --email dev@pyro.host --username dev --name-first Developer --name-last User --password dev
+    php artisan p:user:make -n --email dev@blue.host --username dev --name-first Developer --name-last User --password dev
     # Create a developer user
     if [ "$DB_CONNECTION" = "mysql" ] || [ "$DB_CONNECTION" = "mariadb" ]; then
         mariadb -u root -h database -p"$DB_ROOT_PASSWORD" --ssl=0 -e "USE panel; UPDATE users SET root_admin = 1;"

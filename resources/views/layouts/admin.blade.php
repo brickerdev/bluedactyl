@@ -12,7 +12,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
   <link rel="shortcut icon" href="/favicons/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Pyrodactyl" />
+  <meta name="apple-mobile-web-app-title" content="Bluedactyl" />
   <link rel="manifest" href="/favicons/site.webmanifest" />
 
   <meta name="theme-color" content="#000000">
@@ -185,7 +185,7 @@
         {{ $appVersion }}<br />
         <strong><i class="fa fa-fw fa-clock-o"></i></strong> {{ round(microtime(true) - LARAVEL_START, 3) }}s
       </div>
-      Copyright &copy; 2015 - {{ date('Y') }} <a href="https://pyro.host">Pyro Inc.</a> and <a
+      Copyright &copy; 2015 - {{ date('Y') }} <a href="https://blue.host">Blue Inc.</a> and <a
         href="https://pterodactyl.io/">parent collaborators</a>.
     </footer>
   </div>

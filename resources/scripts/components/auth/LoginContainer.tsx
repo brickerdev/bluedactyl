@@ -1,20 +1,28 @@
-import { useStoreState } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { Formik } from 'formik';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { object, string } from 'yup';
 
-import LoginFormContainer from '@/components/auth/LoginFormContainer';
-import Button from '@/components/elements/Button';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import {
+    Field,
+    FieldGroup,
+    FieldLabel,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import Captcha, { getCaptchaResponse } from '@/components/elements/Captcha';
-import Field from '@/components/elements/Field';
-import Logo from '@/components/elements/PyroLogo';
-
 import CaptchaManager from '@/lib/captcha';
-
 import login from '@/api/auth/login';
-
+import { GalleryVerticalEnd } from 'lucide-react';
 import useFlash from '@/plugins/useFlash';
 
 interface Values {
@@ -87,54 +95,95 @@ function LoginContainer() {
                 password: string().required('Please enter your account password.'),
             })}
         >
-            {({ isSubmitting }) => (
-                <LoginFormContainer className={`w-full flex`}>
-                    <div className='flex h-12 mb-4 items-center w-full'>
-                        <Logo />
-                    </div>
-                    <div aria-hidden className='my-8 bg-[#ffffff33] min-h-[1px]'></div>
-                    <h2 className='text-xl font-extrabold mb-2'>Login</h2>
+            {({ isSubmitting, handleSubmit, handleChange, values }) => (
+                <div className="w-full max-w-md mx-auto flex flex-col gap-6 px-6 py-8">
 
-                    <Field id='user' type={'text'} label={'Username or Email'} name={'user'} disabled={isSubmitting} />
 
-                    <div className={`relative mt-6`}>
-                        <Field
-                            id='password'
-                            type={'password'}
-                            label={'Password'}
-                            name={'password'}
-                            disabled={isSubmitting}
-                        />
-                        <Link
-                            to={'/auth/password'}
-                            className={`text-xs text-zinc-500 tracking-wide no-underline hover:text-zinc-600 absolute top-1 right-0`}
-                        >
-                            Forgot Password?
-                        </Link>
-                    </div>
+                    <Card className="text-card-foreground shadow-lg rounded-lg overflow-hidden backdrop-blur-md bg-secondary-foregroundp
+                    ">
+                        <CardHeader className="text-center pt-4">
+                            <CardTitle className="text-2xl sm:text-3xl font-semibold">Login</CardTitle>
+                            <CardDescription className="text-sm text-zinc-400">
+                                Enter your credentials to continue
+                            </CardDescription>
+                        </CardHeader>
 
-                    <Captcha
-                        className='mt-6'
-                        onError={(error) => {
-                            console.error('Captcha error:', error);
-                            clearAndAddHttpError({
-                                error: new Error('Captcha verification failed. Please try again.'),
-                            });
-                        }}
-                    />
+                        <CardContent className="p-6">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <FieldGroup>
+                                    {/* Username/Email Field */}
+                                    <Field>
+                                        <FieldLabel htmlFor="user">Username or Email</FieldLabel>
+                                        <Input
+                                            id="user"
+                                            name="user"
+                                            type="text"
+                                            autoComplete="username"
+                                            placeholder="Enter your username or email"
+                                            value={values.user}
+                                            onChange={handleChange}
+                                            disabled={isSubmitting}
+                                            required
+                                        />
+                                    </Field>
 
-                    <div className={`mt-6`}>
-                        <Button
-                            className={`relative mt-4 w-full rounded-full bg-brand border-0 ring-0 outline-hidden capitalize font-bold text-sm py-2 hover:cursor-pointer`}
-                            type={'submit'}
-                            size={'xlarge'}
-                            isLoading={isSubmitting}
-                            disabled={isSubmitting}
-                        >
-                            Login
-                        </Button>
-                    </div>
-                </LoginFormContainer>
+                                    {/* Password Field with Forgot Password Link */}
+                                    <Field>
+                                        <div className="flex items-center justify-between">
+                                            <FieldLabel htmlFor="password">Password</FieldLabel>
+                                            <Link
+                                                to="/auth/password"
+                                                className="text-sm text-zinc-500 tracking-wide no-underline hover:text-zinc-600"
+                                            >
+                                                Forgot Password?
+                                            </Link>
+                                        </div>
+                                        <Input
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            autoComplete="current-password"
+                                            placeholder="Enter your password"
+                                            value={values.password}
+                                            onChange={handleChange}
+                                            disabled={isSubmitting}
+                                            required
+                                        />
+                                    </Field>
+
+                                    {/* Captcha Field */}
+                                    <Field>
+                                        <Captcha
+                                            className="mt-3"
+                                            onError={(error) => {
+                                                console.error('Captcha error:', error);
+                                                clearAndAddHttpError({
+                                                    error: new Error('Captcha verification failed. Please try again.'),
+                                                });
+                                            }}
+                                        />
+                                    </Field>
+
+                                    {/* Submit Button */}
+                                    <Field>
+                                        <Button
+                                            type="submit"
+                                            className="w-full mt-2"
+                                            size="default"
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? (
+                                                <Spinner data-icon="inline-start" />
+                                            ) : (
+                                                'Login'
+                                            )}
+                                        </Button>
+                                    </Field>
+                                </FieldGroup>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </Formik>
     );

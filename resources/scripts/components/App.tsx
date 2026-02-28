@@ -2,7 +2,7 @@
 // the only way to prevent mismatching and weird errors is to import the lib
 // in the root first. The github issue for this is still open. Stupid.
 // https://github.com/preactjs/signals/issues/414
-import GlobalStylesheet from '@/assets/css/GlobalStylesheet';
+// import GlobalStylesheet from '@/assets/css/GlobalStylesheet';
 import '@/assets/tailwind.css';
 import '@preact/signals-react';
 import { StoreProvider } from 'easy-peasy';
@@ -25,7 +25,14 @@ const ServerRouter = lazy(() => import('@/routers/ServerRouter'));
 const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'));
 
 interface ExtendedWindow extends Window {
-    SiteConfiguration?: SiteSettings;
+    SiteConfiguration?: SiteSettings & {
+        captcha: {
+            enabled: boolean;
+            provider: string;
+            siteKey: string;
+            scriptIncludes: string[];
+        };
+    };
     PterodactylUser?: {
         uuid: string;
         username: string;
@@ -60,12 +67,11 @@ const App = () => {
 
     return (
         <>
-            <GlobalStylesheet />
             <StoreProvider store={store}>
                 <PyrodactylProvider>
                     <div
-                        data-pyro-routerwrap=''
-                        className='relative w-full h-full flex flex-row p-2 overflow-hidden rounded-lg'
+                        data-blue-routerwrap=''
+                        className='relative w-full min-h-screen flex flex-row overflow-hidden rounded-lg'
                     >
                         <Toaster
                             theme='dark'
