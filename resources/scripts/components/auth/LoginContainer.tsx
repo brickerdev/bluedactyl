@@ -22,8 +22,6 @@ import { Input } from '@/components/ui/input';
 import Captcha, { getCaptchaResponse } from '@/components/elements/Captcha';
 import CaptchaManager from '@/lib/captcha';
 import login from '@/api/auth/login';
-import { GalleryVerticalEnd } from 'lucide-react';
-import useFlash from '@/plugins/useFlash';
 
 interface Values {
     user: string;

@@ -70,10 +70,10 @@ export default defineConfig({
     },
 
     define: {
-        'import.meta.env.VITE_PYRODACTYL_VERSION': JSON.stringify(laravelVersion),
+        'import.meta.env.VITE_BLUEDACTYL_VERSION': JSON.stringify(laravelVersion),
         'import.meta.env.VITE_COMMIT_HASH': JSON.stringify(commitHash),
         'import.meta.env.VITE_BRANCH_NAME': JSON.stringify(branchName),
-        'import.meta.env.VITE_PYRODACTYL_BUILD_NUMBER': JSON.stringify(packageJson.buildNumber),
+        'import.meta.env.VITE_BLUEDACTYL_BUILD_NUMBER': JSON.stringify(packageJson.buildNumber),
         'process.env': {},
         'process.platform': null,
         'process.version': null,

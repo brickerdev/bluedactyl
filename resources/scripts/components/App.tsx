@@ -18,7 +18,7 @@ import { store } from '@/state';
 import { ServerContext } from '@/state/server';
 import { SiteSettings } from '@/state/settings';
 
-import PyrodactylProvider from './PyrodactylProvider';
+import BluedactylProvider from './BluedactylProvider';
 
 const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'));
 const ServerRouter = lazy(() => import('@/routers/ServerRouter'));
@@ -68,7 +68,7 @@ const App = () => {
     return (
         <>
             <StoreProvider store={store}>
-                <PyrodactylProvider>
+                <BluedactylProvider>
                     <div
                         data-blue-routerwrap=''
                         className='relative w-full min-h-screen flex flex-row overflow-hidden rounded-lg'
@@ -121,7 +121,7 @@ const App = () => {
                             </Routes>
                         </BrowserRouter>
                     </div>
-                </PyrodactylProvider>
+                </BluedactylProvider>
             </StoreProvider>
         </>
     );
