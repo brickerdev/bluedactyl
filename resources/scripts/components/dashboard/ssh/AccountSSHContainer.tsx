@@ -1,19 +1,28 @@
 import { Eye, EyeSlash, Key, Plus, TrashBin } from '@gravity-ui/icons';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { format } from 'date-fns';
 import { Actions, useStoreActions } from 'easy-peasy';
-import { Field, Form, Formik, FormikHelpers } from 'formik';
 import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { object, string } from 'yup';
 
 import FlashMessageRender from '@/components/FlashMessageRender';
-import ActionButton from '@/components/elements/ActionButton';
-import Code from '@/components/elements/Code';
-import FormikFieldWrapper from '@/components/elements/FormikFieldWrapper';
-import Input from '@/components/elements/Input';
-import { MainPageHeader } from '@/components/elements/MainPageHeader';
-import PageContentBlock from '@/components/elements/PageContentBlock';
 import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
-import { Dialog } from '@/components/elements/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 import { createSSHKey, deleteSSHKey, useSSHKeys } from '@/api/account/ssh-keys';
 import { httpErrorToHuman } from '@/api/http';
@@ -25,6 +34,58 @@ import { useFlashKey } from '@/plugins/useFlash';
 interface CreateValues {
     name: string;
     publicKey: string;
+}
+
+function CreateSSHForm({
+    onSubmit,
+}: {
+    onSubmit: (values: CreateValues, helpers: { setSubmitting: (v: boolean) => void; resetForm: () => void }) => void;
+}) {
+    const schema = object().shape({
+        name: string().required('SSH Key Name is required'),
+        publicKey: string().required('Public Key is required'),
+    });
+
+    const { control, handleSubmit, formState, reset } = useForm<CreateValues>({
+        resolver: yupResolver(schema as any),
+        defaultValues: { name: '', publicKey: '' },
+    });
+
+    const submitting = formState.isSubmitting;
+
+    return (
+        <form
+            id='create-ssh-form'
+            className='space-y-4'
+            onSubmit={handleSubmit((values) => onSubmit(values, { setSubmitting: () => {}, resetForm: () => reset() }))}
+        >
+            <SpinnerOverlay visible={submitting} />
+
+            <div className='space-y-2'>
+                <Label htmlFor='name'>SSH Key Name</Label>
+                <Controller
+                    control={control}
+                    name='name'
+                    render={({ field }) => <Input {...field} id='name' className='w-full' />}
+                />
+                <p className='text-xs text-muted-foreground'>A name to identify this SSH key.</p>
+            </div>
+
+            <div className='space-y-2'>
+                <Label htmlFor='publicKey'>Public Key</Label>
+                <Controller
+                    control={control}
+                    name='publicKey'
+                    render={({ field }) => (
+                        <Textarea {...field} id='publicKey' className='w-full min-h-[100px] font-mono text-xs' />
+                    )}
+                />
+                <p className='text-xs text-muted-foreground'>Enter your public SSH key.</p>
+            </div>
+
+            <button type='submit' className='hidden' />
+        </form>
+    );
 }
 
 const AccountSSHContainer = () => {
@@ -60,19 +121,22 @@ const AccountSSHContainer = () => {
             });
     };
 
-    const submitCreate = (values: CreateValues, { setSubmitting, resetForm }: FormikHelpers<CreateValues>) => {
+    const submitCreate = (
+        values: CreateValues,
+        helpers: { setSubmitting: (v: boolean) => void; resetForm: () => void },
+    ) => {
         clearFlashes('account:ssh-keys');
         createSSHKey(values.name, values.publicKey)
             .then((key) => {
-                resetForm();
-                setSubmitting(false);
+                helpers.resetForm();
+                helpers.setSubmitting(false);
                 mutate((data) => (data || []).concat(key));
                 setShowCreateModal(false);
             })
             .catch((error) => {
                 console.error(error);
                 addError({ key: 'account:ssh-keys', message: httpErrorToHuman(error) });
-                setSubmitting(false);
+                helpers.setSubmitting(false);
             });
     };
 
@@ -84,184 +148,140 @@ const AccountSSHContainer = () => {
     };
 
     return (
-        <PageContentBlock title={'SSH Keys'}>
+        <div className='container mx-auto p-6'>
             <FlashMessageRender byKey='account:ssh-keys' />
 
             {/* Create SSH Key Modal */}
-            {showCreateModal && (
-                <Dialog.Confirm
-                    open={showCreateModal}
-                    onClose={() => setShowCreateModal(false)}
-                    title='Add SSH Key'
-                    confirm='Add Key'
-                    onConfirmed={() => {
-                        const form = document.getElementById('create-ssh-form') as HTMLFormElement;
-                        if (form) {
-                            const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-                            if (submitButton) submitButton.click();
-                        }
-                    }}
-                >
-                    <Formik
-                        onSubmit={submitCreate}
-                        initialValues={{ name: '', publicKey: '' }}
-                        validationSchema={object().shape({
-                            name: string().required('SSH Key Name is required'),
-                            publicKey: string().required('Public Key is required'),
-                        })}
-                    >
-                        {({ isSubmitting }) => (
-                            <Form id='create-ssh-form' className='space-y-4'>
-                                <SpinnerOverlay visible={isSubmitting} />
+            <AlertDialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Add SSH Key</AlertDialogTitle>
+                    </AlertDialogHeader>
 
-                                <FormikFieldWrapper
-                                    label='SSH Key Name'
-                                    name='name'
-                                    description='A name to identify this SSH key.'
-                                >
-                                    <Field name='name' as={Input} className='w-full' />
-                                </FormikFieldWrapper>
+                    <CreateSSHForm onSubmit={submitCreate} />
 
-                                <FormikFieldWrapper
-                                    label='Public Key'
-                                    name='publicKey'
-                                    description='Enter your public SSH key.'
-                                >
-                                    <Field name='publicKey' as={Input} className='w-full' />
-                                </FormikFieldWrapper>
-
-                                <button type='submit' className='hidden' />
-                            </Form>
-                        )}
-                    </Formik>
-                </Dialog.Confirm>
-            )}
-
-            <div className='w-full h-full min-h-full flex-1 flex flex-col px-2 sm:px-0'>
-                <div
-                    className='transform-gpu skeleton-anim-2 mb-3 sm:mb-4'
-                    style={{
-                        animationDelay: '50ms',
-                        animationTimingFunction:
-                            'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                    }}
-                >
-                    <MainPageHeader
-                        title='SSH Keys'
-                        titleChildren={
-                            <ActionButton
-                                variant='primary'
-                                onClick={() => setShowCreateModal(true)}
-                                className='flex items-center gap-2'
-                            >
-                                <Plus width={22} height={22} fill='currentColor' />
-                                Add SSH Key
-                            </ActionButton>
-                        }
-                    />
-                </div>
-
-                <div
-                    className='transform-gpu skeleton-anim-2'
-                    style={{
-                        animationDelay: '75ms',
-                        animationTimingFunction:
-                            'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                    }}
-                >
-                    <div className='bg-gradient-to-b from-[#ffffff08] to-[#ffffff05] border-[1px] border-[#ffffff12] rounded-xl p-4 sm:p-6 shadow-sm'>
-                        <SpinnerOverlay visible={!data && isValidating} />
-                        <Dialog.Confirm
-                            title={'Delete SSH Key'}
-                            confirm={'Delete Key'}
-                            open={!!deleteKey}
-                            onClose={() => setDeleteKey(null)}
-                            onConfirmed={doDeletion}
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const form = document.getElementById('create-ssh-form') as HTMLFormElement;
+                                if (form) {
+                                    const submitButton = form.querySelector(
+                                        'button[type="submit"]',
+                                    ) as HTMLButtonElement;
+                                    if (submitButton) submitButton.click();
+                                }
+                            }}
                         >
-                            Removing the <Code>{deleteKey?.name}</Code> SSH key will invalidate its usage across the
-                            Panel.
-                        </Dialog.Confirm>
+                            Add Key
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-                        {!data || data.length === 0 ? (
-                            <div className='text-center py-12'>
-                                <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-[#ffffff11] flex items-center justify-center'>
-                                    <Key width={22} height={22} className='text-zinc-400' fill='currentColor' />
-                                </div>
-                                <h3 className='text-lg font-medium text-zinc-200 mb-2'>No SSH Keys</h3>
-                                <p className='text-sm text-zinc-400 max-w-sm mx-auto'>
-                                    {!data
-                                        ? 'Loading your SSH keys...'
-                                        : "You haven't added any SSH keys yet. Add one to securely access your servers."}
-                                </p>
+            <div className='flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4'>
+                <div>
+                    <h1 className='text-3xl font-bold tracking-tight'>SSH Keys</h1>
+                    <p className='text-muted-foreground'>Manage your SSH keys for secure server access.</p>
+                </div>
+                <Button variant='default' onClick={() => setShowCreateModal(true)} className='flex items-center gap-2'>
+                    <Plus width={20} height={20} fill='currentColor' />
+                    Add SSH Key
+                </Button>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className='text-lg'>Active SSH Keys</CardTitle>
+                    <CardDescription>A list of all SSH keys associated with your account.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <SpinnerOverlay visible={!data && isValidating} />
+
+                    <AlertDialog open={!!deleteKey} onOpenChange={(open) => !open && setDeleteKey(null)}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Delete SSH Key</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Removing the{' '}
+                                    <code className='font-mono px-2 py-1 bg-muted/20 rounded'>{deleteKey?.name}</code>{' '}
+                                    SSH key will invalidate its usage across the Panel.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={doDeletion}>Delete Key</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                    {!data || data.length === 0 ? (
+                        <div className='text-center py-12 border rounded-lg'>
+                            <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center'>
+                                <Key width={22} height={22} className='text-muted-foreground' fill='currentColor' />
                             </div>
-                        ) : (
-                            <div className='space-y-3'>
-                                {data.map((key, index) => (
-                                    <div
-                                        key={key.fingerprint}
-                                        className='transform-gpu skeleton-anim-2'
-                                        style={{
-                                            animationDelay: `${index * 25 + 100}ms`,
-                                            animationTimingFunction:
-                                                'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                                        }}
-                                    >
-                                        <div className='bg-[#ffffff05] border-[1px] border-[#ffffff08] rounded-lg p-4 hover:border-[#ffffff15] transition-all duration-150'>
-                                            <div className='flex items-center justify-between'>
-                                                <div className='flex-1 min-w-0'>
-                                                    <div className='flex items-center gap-3 mb-2'>
-                                                        <h4 className='text-sm font-medium text-zinc-100 truncate'>
-                                                            {key.name}
-                                                        </h4>
-                                                    </div>
-                                                    <div className='flex items-center gap-4 text-xs text-zinc-400'>
-                                                        <span>Added: {format(key.createdAt, 'MMM d, yyyy HH:mm')}</span>
-                                                        <div className='flex items-center gap-2'>
-                                                            <span>Fingerprint:</span>
-                                                            <code className='font-mono px-2 py-1 bg-[#ffffff08] border border-[#ffffff08] rounded text-zinc-300'>
-                                                                {showKeys[key.fingerprint]
-                                                                    ? `SHA256:${key.fingerprint}`
-                                                                    : 'SHA256:••••••••••••••••'}
-                                                            </code>
-                                                            <ActionButton
-                                                                variant='secondary'
-                                                                size='sm'
-                                                                onClick={() => toggleKeyVisibility(key.fingerprint)}
-                                                                className='p-1 text-zinc-400 hover:text-zinc-300'
-                                                            >
-                                                                {showKeys[key.fingerprint] ? (
-                                                                    <EyeSlash
-                                                                        width={18}
-                                                                        height={18}
-                                                                        fill='currentColor'
-                                                                    />
-                                                                ) : (
-                                                                    <Eye width={18} height={18} fill='currentColor' />
-                                                                )}
-                                                            </ActionButton>
-                                                        </div>
-                                                    </div>
+                            <h3 className='text-lg font-semibold mb-2'>No SSH Keys</h3>
+                            <p className='text-sm text-muted-foreground max-w-sm mx-auto'>
+                                {!data
+                                    ? 'Loading your SSH keys...'
+                                    : "You haven't added any SSH keys yet. Add one to securely access your servers."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className='space-y-3'>
+                            {data.map((key) => (
+                                <div
+                                    key={key.fingerprint}
+                                    className='bg-popover border border-border rounded-lg p-4 hover:border-accent transition-all duration-150'
+                                >
+                                    <div className='flex items-center justify-between'>
+                                        <div className='flex-1 min-w-0'>
+                                            <div className='flex items-center gap-3 mb-2'>
+                                                <h4 className='text-sm font-medium truncate'>{key.name}</h4>
+                                            </div>
+                                            <div className='flex flex-wrap items-center gap-4 text-xs text-muted-foreground'>
+                                                <span>Added: {format(key.createdAt, 'MMM d, yyyy HH:mm')}</span>
+                                                <div className='flex items-center gap-2'>
+                                                    <span>Fingerprint:</span>
+                                                    <code className='font-mono px-2 py-1 bg-muted/20 border border-border rounded'>
+                                                        {showKeys[key.fingerprint]
+                                                            ? `SHA256:${key.fingerprint}`
+                                                            : 'SHA256:••••••••••••••••'}
+                                                    </code>
+                                                    <Button
+                                                        variant='ghost'
+                                                        size='icon'
+                                                        onClick={() => toggleKeyVisibility(key.fingerprint)}
+                                                        className='h-7 w-7'
+                                                    >
+                                                        {showKeys[key.fingerprint] ? (
+                                                            <EyeSlash width={16} height={16} fill='currentColor' />
+                                                        ) : (
+                                                            <Eye width={16} height={16} fill='currentColor' />
+                                                        )}
+                                                    </Button>
                                                 </div>
-                                                <ActionButton
-                                                    variant='danger'
-                                                    size='sm'
-                                                    className='ml-4'
-                                                    onClick={() =>
-                                                        setDeleteKey({ name: key.name, fingerprint: key.fingerprint })
-                                                    }
-                                                >
-                                                    <TrashBin width={20} height={20} fill='currentColor' />
-                                                </ActionButton>
                                             </div>
                                         </div>
+                                        <Button
+                                            variant='destructive'
+                                            size='icon'
+                                            className='ml-4'
+                                            onClick={() =>
+                                                setDeleteKey({ name: key.name, fingerprint: key.fingerprint })
+                                            }
+                                        >
+                                            <TrashBin width={18} height={18} fill='currentColor' />
+                                        </Button>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </PageContentBlock>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 

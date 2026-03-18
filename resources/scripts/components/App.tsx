@@ -1,28 +1,17 @@
-// Because of how react-router, react lazy, and signals work with each other
-// the only way to prevent mismatching and weird errors is to import the lib
-// in the root first. The github issue for this is still open. Stupid.
-// https://github.com/preactjs/signals/issues/414
-// import GlobalStylesheet from '@/assets/css/GlobalStylesheet';
 import '@/assets/tailwind.css';
+import { router } from '@/routes';
 import '@preact/signals-react';
 import { StoreProvider } from 'easy-peasy';
-import { lazy } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { RouterProvider } from 'react-router-dom';
 
-import AuthenticatedRoute from '@/components/elements/AuthenticatedRoute';
-import { NotFound } from '@/components/elements/ScreenBlock';
 import Spinner from '@/components/elements/Spinner';
+import { ThemeProvider } from '@/components/ui/theme-provider';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { store } from '@/state';
-import { ServerContext } from '@/state/server';
 import { SiteSettings } from '@/state/settings';
 
 import BluedactylProvider from './BluedactylProvider';
-
-const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'));
-const ServerRouter = lazy(() => import('@/routers/ServerRouter'));
-const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'));
 
 interface ExtendedWindow extends Window {
     SiteConfiguration?: SiteSettings & {
@@ -46,6 +35,8 @@ interface ExtendedWindow extends Window {
     };
 }
 
+// Define routes using createBrowserRouter
+
 const App = () => {
     const { PterodactylUser, SiteConfiguration } = window as ExtendedWindow;
     if (PterodactylUser && !store.getState().user.data) {
@@ -66,64 +57,22 @@ const App = () => {
     }
 
     return (
-        <>
-            <StoreProvider store={store}>
-                <BluedactylProvider>
-                    <div
-                        data-blue-routerwrap=''
-                        className='relative w-full min-h-screen flex flex-row overflow-hidden rounded-lg'
-                    >
-                        <Toaster
-                            theme='dark'
-                            toastOptions={{
-                                unstyled: true,
-                                classNames: {
-                                    toast: 'p-4 bg-[#ffffff09] border border-[#ffffff12] rounded-2xl shadow-lg backdrop-blur-2xl flex items-center w-full gap-2',
-                                },
-                            }}
-                        />
-                        <BrowserRouter>
-                            <Routes>
-                                <Route
-                                    path='/auth/*'
-                                    element={
-                                        <Spinner.Suspense>
-                                            <AuthenticationRouter />
-                                        </Spinner.Suspense>
-                                    }
-                                />
-
-                                <Route
-                                    path='/server/:id/*'
-                                    element={
-                                        <AuthenticatedRoute>
-                                            <Spinner.Suspense>
-                                                <ServerContext.Provider>
-                                                    <ServerRouter />
-                                                </ServerContext.Provider>
-                                            </Spinner.Suspense>
-                                        </AuthenticatedRoute>
-                                    }
-                                />
-
-                                <Route
-                                    path='/*'
-                                    element={
-                                        <AuthenticatedRoute>
-                                            <Spinner.Suspense>
-                                                <DashboardRouter />
-                                            </Spinner.Suspense>
-                                        </AuthenticatedRoute>
-                                    }
-                                />
-
-                                <Route path='*' element={<NotFound />} />
-                            </Routes>
-                        </BrowserRouter>
-                    </div>
-                </BluedactylProvider>
-            </StoreProvider>
-        </>
+        <StoreProvider store={store}>
+            <ThemeProvider defaultTheme='dark'>
+                <TooltipProvider>
+                    <BluedactylProvider>
+                        <div
+                            data-blue-routerwrap=''
+                            className='relative w-full min-h-screen flex flex-row overflow-hidden bg-background text-foreground'
+                        >
+                            <Spinner.Suspense>
+                                <RouterProvider router={router} />
+                            </Spinner.Suspense>
+                        </div>
+                    </BluedactylProvider>
+                </TooltipProvider>
+            </ThemeProvider>
+        </StoreProvider>
     );
 };
 

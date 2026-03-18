@@ -6,7 +6,6 @@ import { object, ref, string } from 'yup';
 import LoginFormContainer from '@/components/auth/LoginFormContainer';
 import Button from '@/components/elements/Button';
 import Captcha, { getCaptchaResponse } from '@/components/elements/Captcha';
-import ContentBox from '@/components/elements/ContentBox';
 import Field from '@/components/elements/Field';
 import Input from '@/components/elements/Input';
 
@@ -88,7 +87,7 @@ function ResetPasswordContainer() {
     };
 
     return (
-        <ContentBox>
+        <>
             <Formik
                 onSubmit={submit}
                 initialValues={{
@@ -163,7 +162,7 @@ function ResetPasswordContainer() {
                     </LoginFormContainer>
                 )}
             </Formik>
-        </ContentBox>
+        </>
     );
 }
 

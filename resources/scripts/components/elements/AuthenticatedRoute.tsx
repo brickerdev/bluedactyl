@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { useStoreState } from '@/state/hooks';
+import { JSX } from 'react/jsx-runtime';
 
 function AuthenticatedRoute({ children }: { children?: ReactNode }): JSX.Element {
     const isAuthenticated = useStoreState((state) => !!state.user.data?.uuid);

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { object, string } from 'yup';
 
+import { ShineBorder } from '@/components/ui/shine-border';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -22,6 +23,8 @@ import { Input } from '@/components/ui/input';
 import Captcha, { getCaptchaResponse } from '@/components/elements/Captcha';
 import CaptchaManager from '@/lib/captcha';
 import login from '@/api/auth/login';
+import { GalleryVerticalEnd } from 'lucide-react';
+import useFlash from '@/plugins/useFlash';
 
 interface Values {
     user: string;
@@ -94,12 +97,17 @@ function LoginContainer() {
             })}
         >
             {({ isSubmitting, handleSubmit, handleChange, values }) => (
-                <div className="w-full max-w-md mx-auto flex flex-col gap-6 px-6 py-8">
+                <div className="w-full max-w-md mx-auto flex flex-col gap-6 py-8 items-center">
+                    <Link to="/" className="flex items-center gap-3 self-center text-sm sm:text-base font-medium">
+                        <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-md">
+                            <GalleryVerticalEnd className="h-5 w-5" />
+                        </div>
+                        Bluedactyl
+                    </Link>
 
-
-                    <Card className="text-card-foreground shadow-lg rounded-lg overflow-hidden backdrop-blur-md bg-secondary-foregroundp
-                    ">
-                        <CardHeader className="text-center pt-4">
+                    <Card className="relative w-full max-w-87.5 overflow-hidden">
+                        <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+                        <CardHeader className="text-left pt-4">
                             <CardTitle className="text-2xl sm:text-3xl font-semibold">Login</CardTitle>
                             <CardDescription className="text-sm text-zinc-400">
                                 Enter your credentials to continue

@@ -5,131 +5,177 @@
 @endsection
 
 @section('content-header')
-    <h1>{{ $host->name }}<small>Viewing associated databases and details for this database host.</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.databases') }}">Database Hosts</a></li>
-        <li class="active">{{ $host->name }}</li>
-    </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter uppercase">{{ $host->name }}</h1>
+            <p class="text-base-content/60 text-sm">Viewing associated databases and details for this database host.</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.databases') }}">Database Hosts</a></li>
+                <li class="text-primary font-bold">{{ $host->name }}</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-<form action="{{ route('admin.databases.view', $host->id) }}" method="POST">
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Host Details</h3>
+    <form action="{{ route('admin.databases.view', $host->id) }}" method="POST">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Host Details --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-database-2-line text-primary text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold uppercase tracking-tight">Host Details</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="form-control w-full">
+                            <label for="pName" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Name</span>
+                            </label>
+                            <input type="text" id="pName" name="name" class="input input-bordered w-full focus:input-primary transition-all" value="{{ old('name', $host->name) }}" />
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="form-control md:col-span-2">
+                                <label for="pHost" class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Host</span>
+                                </label>
+                                <input type="text" id="pHost" name="host" class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" value="{{ old('host', $host->host) }}" />
+                            </div>
+                            <div class="form-control">
+                                <label for="pPort" class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Port</span>
+                                </label>
+                                <input type="text" id="pPort" name="port" class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" value="{{ old('port', $host->port) }}" />
+                            </div>
+                        </div>
+                        <div class="form-control w-full">
+                            <label for="pNodeId" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Linked Node</span>
+                            </label>
+                            <select name="node_id" id="pNodeId" class="select select-bordered w-full focus:select-primary transition-all">
+                                <option value="">None</option>
+                                @foreach($locations as $location)
+                                    <optgroup label="{{ $location->short }}">
+                                        @foreach($location->nodes as $node)
+                                            <option value="{{ $node->id }}" {{ $host->node_id !== $node->id ?: 'selected' }}>{{ $node->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">Defaults to this host when adding a database to a server on the selected node.</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="pName" class="form-label">Name</label>
-                        <input type="text" id="pName" name="name" class="form-control" value="{{ old('name', $host->name) }}" />
+            </div>
+
+            {{-- User Details --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md h-fit">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                            <i class="ri-key-2-line text-secondary text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold uppercase tracking-tight">User Details</h3>
                     </div>
-                    <div class="form-group">
-                        <label for="pHost" class="form-label">Host</label>
-                        <input type="text" id="pHost" name="host" class="form-control" value="{{ old('host', $host->host) }}" />
-                        <p class="text-muted small">The IP address or FQDN that should be used when attempting to connect to this MySQL host <em>from the panel</em> to add new databases.</p>
+
+                    <div class="space-y-4">
+                        <div class="form-control w-full">
+                            <label for="pUsername" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Username</span>
+                            </label>
+                            <input type="text" name="username" id="pUsername" class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" value="{{ old('username', $host->username) }}" />
+                        </div>
+                        <div class="form-control w-full">
+                            <label for="pPassword" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Password</span>
+                            </label>
+                            <input type="password" name="password" id="pPassword" class="input input-bordered w-full focus:input-primary transition-all" placeholder="Leave blank to keep current" />
+                        </div>
+
+                        <div class="alert alert-soft alert-warning mt-4">
+                            <i class="ri-error-warning-line text-xl"></i>
+                            <div class="text-xs">
+                                <p class="font-bold uppercase tracking-wide">Important</p>
+                                <p>Account MUST have <code>WITH GRANT OPTION</code>. Do NOT use the panel's own MySQL account.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="pPort" class="form-label">Port</label>
-                        <input type="text" id="pPort" name="port" class="form-control" value="{{ old('port', $host->port) }}" />
-                        <p class="text-muted small">The port that MySQL is running on for this host.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="pNodeId" class="form-label">Linked Node</label>
-                        <select name="node_id" id="pNodeId" class="form-control">
-                            <option value="">None</option>
-                            @foreach($locations as $location)
-                                <optgroup label="{{ $location->short }}">
-                                    @foreach($location->nodes as $node)
-                                        <option value="{{ $node->id }}" {{ $host->node_id !== $node->id ?: 'selected' }}>{{ $node->name }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
-                        <p class="text-muted small">This setting does nothing other than default to this database host when adding a database to a server on the selected node.</p>
+
+                    <div class="card-actions justify-between mt-8 pt-6 border-t border-base-300">
+                        <button name="_method" value="DELETE" class="btn btn-ghost btn-error btn-sm font-bold uppercase tracking-wider" onclick="return confirm('Are you sure you want to delete this database host?')">
+                            <i class="ri-delete-bin-line mr-2"></i>
+                            Delete
+                        </button>
+                        <div class="flex gap-3">
+                            {!! csrf_field() !!}
+                            <button name="_method" value="PATCH" class="btn btn-primary px-8 font-bold uppercase tracking-wider">
+                                <i class="ri-save-line mr-2"></i>
+                                Save Changes
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">User Details</h3>
-                </div>
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="pUsername" class="form-label">Username</label>
-                        <input type="text" name="username" id="pUsername" class="form-control" value="{{ old('username', $host->username) }}" />
-                        <p class="text-muted small">The username of an account that has enough permissions to create new users and databases on the system.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="pPassword" class="form-label">Password</label>
-                        <input type="password" name="password" id="pPassword" class="form-control" />
-                        <p class="text-muted small">The password to the account defined. Leave blank to continue using the assigned password.</p>
-                    </div>
-                    <hr />
-                    <p class="text-danger small text-left">The account defined for this database host <strong>must</strong> have the <code>WITH GRANT OPTION</code> permission. If the defined account does not have this permission requests to create databases <em>will</em> fail. <strong>Do not use the same account details for MySQL that you have defined for this panel.</strong></p>
-                </div>
-                <div class="box-footer">
-                    {!! csrf_field() !!}
-                    <button name="_method" value="PATCH" class="btn btn-sm btn-primary pull-right">Save</button>
-                    <button name="_method" value="DELETE" class="btn btn-sm btn-danger pull-left muted muted-hover"><i class="fa fa-trash-o"></i></button>
-                </div>
+    </form>
+
+    <div class="mt-12">
+        <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md overflow-hidden">
+            <div class="p-4 border-b border-base-300 bg-base-300/30 flex items-center justify-between">
+                <h3 class="font-black uppercase tracking-tighter">Databases on this Host</h3>
+                <span class="badge badge-soft badge-primary font-bold">{{ $databases->total() }}</span>
             </div>
-        </div>
-    </div>
-</form>
-<div class="row">
-    <div class="col-xs-12">
-        <div class="box">
-            <div class="box-header with-border">
-                <h3 class="box-title">Databases</h3>
-            </div>
-            <div class="box-body table-responsive no-padding">
-                <table class="table table-hover">
-                    <tr>
-                        <th>Server</th>
-                        <th>Database Name</th>
-                        <th>Username</th>
-                        <th>Connections From</th>
-                        <th>Max Connections</th>
-                        <th></th>
-                    </tr>
-                    @foreach($databases as $database)
-                        <tr>
-                            <td class="middle"><a href="{{ route('admin.servers.view', $database->getRelation('server')->id) }}">{{ $database->getRelation('server')->name }}</a></td>
-                            <td class="middle">{{ $database->database }}</td>
-                            <td class="middle">{{ $database->username }}</td>
-                            <td class="middle">{{ $database->remote }}</td>
-                            @if($database->max_connections != null)
-                                <td class="middle">{{ $database->max_connections }}</td>
-                            @else
-                                <td class="middle">Unlimited</td>
-                            @endif
-                            <td class="text-center">
-                                <a href="{{ route('admin.servers.view.database', $database->getRelation('server')->id) }}">
-                                    <button class="btn btn-xs btn-primary">Manage</button>
-                                </a>
-                            </td>
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr class="bg-base-300/50">
+                            <th class="text-[10px] uppercase tracking-widest font-black">Server</th>
+                            <th class="text-[10px] uppercase tracking-widest font-black">Database Name</th>
+                            <th class="text-[10px] uppercase tracking-widest font-black">Username</th>
+                            <th class="text-[10px] uppercase tracking-widest font-black">Connections From</th>
+                            <th class="text-[10px] uppercase tracking-widest font-black text-center">Max Connections</th>
+                            <th class="text-[10px] uppercase tracking-widest font-black text-right">Actions</th>
                         </tr>
-                    @endforeach
+                    </thead>
+                    <tbody>
+                        @foreach($databases as $database)
+                            <tr class="hover:bg-base-300/30 transition-colors text-sm">
+                                <td>
+                                    <a href="{{ route('admin.servers.view', $database->getRelation('server')->id) }}" class="link link-primary font-bold hover:no-underline">
+                                        {{ $database->getRelation('server')->name }}
+                                    </a>
+                                </td>
+                                <td><code class="text-xs font-bold">{{ $database->database }}</code></td>
+                                <td><code class="text-xs font-bold">{{ $database->username }}</code></td>
+                                <td><code class="text-xs font-bold">{{ $database->remote }}</code></td>
+                                <td class="text-center">
+                                    @if($database->max_connections != null)
+                                        <span class="badge badge-soft badge-sm font-mono font-bold">{{ $database->max_connections }}</span>
+                                    @else
+                                        <span class="badge badge-soft badge-sm font-bold uppercase tracking-wider">Unlimited</span>
+                                    @endif
+                                </td>
+                                <td class="text-right">
+                                    <a href="{{ route('admin.servers.view.database', $database->getRelation('server')->id) }}" class="btn btn-ghost btn-xs text-primary font-bold uppercase tracking-wider">Manage</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
                 </table>
             </div>
             @if($databases->hasPages())
-                <div class="box-footer with-border">
-                    <div class="col-md-12 text-center">{!! $databases->render() !!}</div>
+                <div class="p-4 border-t border-base-300 bg-base-300/30 flex justify-center">
+                    {!! $databases->render() !!}
                 </div>
             @endif
         </div>
     </div>
-</div>
-@endsection
-
-@section('footer-scripts')
-    @parent
-    <script>
-        $('#pNodeId').select2();
-    </script>
 @endsection

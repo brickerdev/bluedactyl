@@ -1,14 +1,23 @@
 import ModalContext, { ModalContextValues } from '@/context/ModalContext';
 import { PureComponent } from 'react';
 
-import PortaledModal, { ModalProps } from '@/components/elements/Modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export interface AsModalProps {
     visible: boolean;
     onModalDismissed?: () => void;
 }
 
-export type SettableModalProps = Omit<ModalProps, 'appear' | 'visible' | 'onDismissed'>;
+export interface ModalProps {
+    title?: string;
+    visible: boolean;
+    onDismissed: () => void;
+    children?: React.ReactNode;
+    closeOnEscape?: boolean;
+    closeOnBackground?: boolean;
+}
+
+export type SettableModalProps = Omit<ModalProps, 'visible' | 'onDismissed'>;
 
 interface State {
     render: boolean;
@@ -63,27 +72,38 @@ function asModal<P extends object>(
                 }));
 
             override render() {
-                if (!this.state.render) return null;
+                const { visible, title } = this.computedModalProps;
 
                 return (
-                    <PortaledModal
-                        onDismissed={() => {
-                            this.setState({ render: false });
-                            if (typeof this.props.onModalDismissed === 'function') {
-                                this.props.onModalDismissed();
+                    <Dialog
+                        open={visible}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                this.setState({ render: false });
+                                if (typeof this.props.onModalDismissed === 'function') {
+                                    this.props.onModalDismissed();
+                                }
                             }
                         }}
-                        {...this.computedModalProps}
                     >
-                        <ModalContext.Provider
-                            value={{
-                                dismiss: this.dismiss.bind(this),
-                                setPropOverrides: this.setPropOverrides.bind(this),
-                            }}
-                        >
-                            <Component {...this.props} />
-                        </ModalContext.Provider>
-                    </PortaledModal>
+                        <DialogContent className='sm:max-w-[600px] p-0 overflow-hidden border-none bg-transparent shadow-none'>
+                            <div className='bg-background rounded-xl border border-border shadow-lg overflow-hidden'>
+                                {title && (
+                                    <DialogHeader className='p-6 pb-0'>
+                                        <DialogTitle className='text-2xl font-bold'>{title}</DialogTitle>
+                                    </DialogHeader>
+                                )}
+                                <ModalContext.Provider
+                                    value={{
+                                        dismiss: this.dismiss.bind(this),
+                                        setPropOverrides: this.setPropOverrides.bind(this),
+                                    }}
+                                >
+                                    <Component {...this.props} />
+                                </ModalContext.Provider>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 );
             }
         };

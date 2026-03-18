@@ -1,7 +1,6 @@
-import { GalleryVerticalEnd } from 'lucide-react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
-import { GravityStarsBackground } from '@/components/animate-ui/components/backgrounds/gravity-stars';
+import { GravityStarsBackground } from '@/components/animate-ui/gravity-stars';
 import ForgotPasswordContainer from '@/components/auth/ForgotPasswordContainer';
 import LoginCheckpointContainer from '@/components/auth/LoginCheckpointContainer';
 import LoginContainer from '@/components/auth/LoginContainer';
@@ -10,22 +9,12 @@ import { NotFound } from '@/components/elements/ScreenBlock';
 
 const AuthenticationRouter = () => {
     return (
-        <div className='relative w-full h-screen overflow-hidden'>
-            <GravityStarsBackground className='absolute inset-0 -z-10 pointer-events-none opacity-70' />
-
-            <div className='pointer-events-none absolute left-1/2 top-6 -translate-x-1/2 flex items-center gap-3 text-sm font-medium sm:text-base'>
-                <Link
-                    to='/'
-                    className='pointer-events-auto flex items-center gap-3'
-                >
-                    <div className='bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-md'>
-                        <GalleryVerticalEnd className='h-5 w-5' />
-                    </div>
-                    Bluedactyl
-                </Link>
+        <div className='relative w-full h-screen overflow-hidden bg-background'>
+            <div className='fixed inset-0 z-0 pointer-events-none'>
+                <GravityStarsBackground className='w-full h-full opacity-60' />
             </div>
 
-            <div className='mt-20'>
+            <div className='relative z-10 w-full h-full flex flex-col items-center justify-center overflow-y-auto p-4 sm:p-8 pointer-events-auto'>
                 <Routes>
                     <Route path='login' element={<LoginContainer />} />
                     <Route path='login/checkpoint/*' element={<LoginCheckpointContainer />} />

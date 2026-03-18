@@ -2,261 +2,314 @@
 @include('partials/admin.settings.nav', ['activeTab' => 'domains'])
 
 @section('title')
-  Edit Domain
+    Edit Domain: {{ $domain->name }}
 @endsection
 
 @section('content-header')
-  <h1>Edit Domain<small>Update DNS domain configuration.</small></h1>
-  <ol class="breadcrumb">
-    <li><a href="{{ route('admin.index') }}">Admin</a></li>
-    <li><a href="{{ route('admin.settings') }}">Settings</a></li>
-    <li><a href="{{ route('admin.settings.domains.index') }}">Domains</a></li>
-    <li class="active">{{ $domain->name }}</li>
-  </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-4xl font-black tracking-tighter uppercase">Edit Domain</h1>
+            <p class="text-base-content/60 text-sm">Update DNS domain configuration for <code
+                    class="text-primary font-bold">{{ $domain->name }}</code>.</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.settings') }}">Settings</a></li>
+                <li><a href="{{ route('admin.settings.domains.index') }}">Domains</a></li>
+                <li class="text-primary font-bold">{{ $domain->name }}</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-  @yield('settings::nav')
-  <div class="row">
-    <div class="col-xs-12">
-      <form action="{{ route('admin.settings.domains.update', $domain) }}" method="POST" id="domain-form">
-        <div class="box">
-          <div class="box-header with-border">
-            <h3 class="box-title">Domain Information</h3>
-          </div>
-          <div class="box-body">
-            <div class="row">
-              <div class="form-group col-md-6">
-                <label for="name" class="control-label">Domain Name <span class="field-required"></span></label>
-                <div>
-                  <input type="text" name="name" id="name" class="form-control" 
-                         value="{{ old('name', $domain->name) }}" placeholder="example.com" required />
-                  <p class="text-muted small">The domain name that will be used for subdomains (e.g., example.com).</p>
+    @yield('settings::nav')
+
+    <form action="{{ route('admin.settings.domains.update', $domain) }}" method="POST" id="domain-form">
+        <div class="grid grid-cols-1 gap-8">
+            {{-- Domain Information --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-global-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Domain Information</h3>
+                            <p class="text-xs text-base-content/50 italic">Update basic identification for this domain.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="form-control w-full">
+                            <label for="name" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Domain Name</span>
+                            </label>
+                            <input type="text" name="name" id="name"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('name', $domain->name) }}" placeholder="example.com" required />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">The domain name that will be used for
+                                    subdomains.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label for="dns_provider" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">DNS Provider</span>
+                            </label>
+                            <select name="dns_provider" id="dns_provider"
+                                class="select select-bordered focus:select-primary w-full transition-all" required>
+                                <option value="">Select a DNS provider...</option>
+                                @foreach ($providers as $key => $provider)
+                                    <option value="{{ $key }}" @if (old('dns_provider', $domain->dns_provider) === $key) selected @endif>
+                                        {{ $provider['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">The DNS service provider that manages this
+                                    domain.</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="form-group col-md-6">
-                <label for="dns_provider" class="control-label">DNS Provider <span class="field-required"></span></label>
-                <div>
-                  <select name="dns_provider" id="dns_provider" class="form-control" required>
-                    <option value="">Select a DNS provider...</option>
-                    @foreach($providers as $key => $provider)
-                      <option value="{{ $key }}" 
-                              @if(old('dns_provider', $domain->dns_provider) === $key) selected @endif>
-                        {{ $provider['name'] }}
-                      </option>
-                    @endforeach
-                  </select>
-                  <p class="text-muted small">The DNS service provider that manages this domain.</p>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
 
-        <div class="box" id="dns-config-box" style="display: none;">
-          <div class="box-header with-border">
-            <h3 class="box-title">DNS Provider Configuration</h3>
-          </div>
-          <div class="box-body" id="dns-config-content">
-            <!-- Dynamic content will be loaded here -->
-          </div>
-        </div>
-
-        <div class="box">
-          <div class="box-header with-border">
-            <h3 class="box-title">Additional Settings</h3>
-          </div>
-          <div class="box-body">
-            <div class="row">
-              <div class="form-group col-md-4">
-                <label class="control-label">Status</label>
-                <div>
-                  <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-primary @if(old('is_active', $domain->is_active)) active @endif">
-                      <input type="radio" name="is_active" value="1" 
-                             @if(old('is_active', $domain->is_active)) checked @endif> Active
-                    </label>
-                    <label class="btn btn-primary @if(!old('is_active', $domain->is_active)) active @endif">
-                      <input type="radio" name="is_active" value="0" 
-                             @if(!old('is_active', $domain->is_active)) checked @endif> Inactive
-                    </label>
-                  </div>
-                  <p class="text-muted small">Whether this domain should be available for subdomain creation.</p>
+            {{-- DNS Provider Configuration (Dynamic) --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md" id="dns-config-box"
+                style="display: none;">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-settings-5-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">DNS Provider Configuration</h3>
+                            <p class="text-xs text-base-content/50 italic">Specific credentials and settings for the chosen
+                                provider.</p>
+                        </div>
+                    </div>
+                    <div id="dns-config-content">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
                 </div>
-              </div>
-              <div class="form-group col-md-4">
-                <label class="control-label">Default Domain</label>
-                <div>
-                  <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-primary @if(old('is_default', $domain->is_default)) active @endif">
-                      <input type="radio" name="is_default" value="1"
-                             @if(old('is_default', $domain->is_default)) checked @endif> Yes
-                    </label>
-                    <label class="btn btn-primary @if(!old('is_default', $domain->is_default)) active @endif">
-                      <input type="radio" name="is_default" value="0"
-                             @if(!old('is_default', $domain->is_default)) checked @endif> No
-                    </label>
-                  </div>
-                  <p class="text-muted small">Whether this domain should be used as the default for automatic subdomain generation.</p>
-                </div>
-              </div>
-              <div class="form-group col-md-4">
-                <label class="control-label">Active Subdomains</label>
-                <div>
-                  <p class="form-control-static">
-                    <span class="label label-default">{{ $domain->serverSubdomains->where('is_active', true)->count() }}</span>
-                    subdomain(s) currently using this domain
-                  </p>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
 
-        <div class="box box-primary">
-          <div class="box-footer">
-            {{ csrf_field() }}
-            @method('PATCH')
-            <button type="button" id="test-connection" class="btn btn-sm btn-info" disabled>
-              <i class="fa fa-refresh fa-spin" style="display: none;"></i> Test Connection
-            </button>
-            <a href="{{ route('admin.settings.domains.index') }}" class="btn btn-sm btn-default">Cancel</a>
-            <button type="submit" class="btn btn-sm btn-success pull-right">Update Domain</button>
-          </div>
+            {{-- Additional Settings --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-equalizer-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Additional Settings</h3>
+                            <p class="text-xs text-base-content/50 italic">Configure the availability and default status of
+                                this domain.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Status</span>
+                            </label>
+                            <div class="join w-full border border-base-300 rounded-xl overflow-hidden bg-base-300/30">
+                                <input class="join-item btn btn-sm flex-1 font-bold uppercase tracking-wider" type="radio"
+                                    name="is_active" value="1" aria-label="Active"
+                                    @if (old('is_active', $domain->is_active)) checked @endif />
+                                <input class="join-item btn btn-sm flex-1 font-bold uppercase tracking-wider" type="radio"
+                                    name="is_active" value="0" aria-label="Inactive"
+                                    @if (!old('is_active', $domain->is_active)) checked @endif />
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Whether this domain should be available
+                                    for subdomain creation.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Default Domain</span>
+                            </label>
+                            <div class="join w-full border border-base-300 rounded-xl overflow-hidden bg-base-300/30">
+                                <input class="join-item btn btn-sm flex-1 font-bold uppercase tracking-wider" type="radio"
+                                    name="is_default" value="1" aria-label="Yes"
+                                    @if (old('is_default', $domain->is_default)) checked @endif />
+                                <input class="join-item btn btn-sm flex-1 font-bold uppercase tracking-wider" type="radio"
+                                    name="is_default" value="0" aria-label="No"
+                                    @if (!old('is_default', $domain->is_default)) checked @endif />
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Whether this domain should be used as the
+                                    default for automatic generation.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Active Subdomains</span>
+                            </label>
+                            <div class="flex items-center gap-3 h-10 px-4 bg-base-300/30 rounded-xl border border-base-300">
+                                <span
+                                    class="badge badge-primary font-mono font-black">{{ $domain->serverSubdomains->where('is_active', true)->count() }}</span>
+                                <span class="text-xs font-bold uppercase tracking-wider opacity-60">Currently Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-4">
+                <button type="button" id="test-connection"
+                    class="btn btn-outline btn-info px-8 font-bold uppercase tracking-wider" disabled>
+                    <span class="loading loading-spinner loading-xs hidden" id="test-spinner"></span>
+                    <i class="ri-plug-line mr-1"></i>
+                    Test Connection
+                </button>
+                <div class="flex gap-3">
+                    {{ csrf_field() }}
+                    @method('PATCH')
+                    <a href="{{ route('admin.settings.domains.index') }}"
+                        class="btn btn-ghost font-bold uppercase tracking-wider">Cancel</a>
+                    <button type="submit"
+                        class="btn btn-primary px-12 font-bold uppercase tracking-wider shadow-lg shadow-primary/20">
+                        <i class="ri-save-line mr-1"></i>
+                        Update Domain
+                    </button>
+                </div>
+            </div>
         </div>
-      </form>
-    </div>
-  </div>
+    </form>
 @endsection
 
 @section('footer-scripts')
-  @parent
-  <script>
-    $(document).ready(function() {
-      const $providerSelect = $('#dns_provider');
-      const $configBox = $('#dns-config-box');
-      const $configContent = $('#dns-config-content');
-      const $testButton = $('#test-connection');
-      const $form = $('#domain-form');
-      const existingConfig = @json(old('dns_config', $domain->dns_config));
+    @parent
+    <script>
+        $(document).ready(function() {
+            const $providerSelect = $('#dns_provider');
+            const $configBox = $('#dns-config-box');
+            const $configContent = $('#dns-config-content');
+            const $testButton = $('#test-connection');
+            const $testSpinner = $('#test-spinner');
+            const existingConfig = @json(old('dns_config', $domain->dns_config));
 
-      // Handle provider selection
-      $providerSelect.change(function() {
-        const provider = $(this).val();
-        
-        if (provider) {
-          loadProviderConfig(provider);
-          $testButton.prop('disabled', false);
-        } else {
-          $configBox.hide();
-          $testButton.prop('disabled', true);
-        }
-      });
+            // Handle provider selection
+            $providerSelect.change(function() {
+                const provider = $(this).val();
 
-      // Test connection
-      $testButton.click(function() {
-        const $button = $(this);
-        const $spinner = $button.find('.fa-spin');
-        
-        // Gather form data
-        const formData = {
-          dns_provider: $providerSelect.val(),
-          dns_config: {}
-        };
-
-        // Collect DNS config fields
-        $configContent.find('input').each(function() {
-          const name = $(this).attr('name');
-          if (name && name.startsWith('dns_config[')) {
-            const key = name.replace('dns_config[', '').replace(']', '');
-            formData.dns_config[key] = $(this).val();
-          }
-        });
-
-        $button.prop('disabled', true);
-        $spinner.show();
-
-        $.post('{{ route('admin.settings.domains.test-connection') }}', {
-          _token: '{{ csrf_token() }}',
-          ...formData
-        })
-        .done(function(response) {
-          if (response.success) {
-            swal({
-              type: 'success',
-              title: 'Connection Successful',
-              text: response.message
+                if (provider) {
+                    loadProviderConfig(provider);
+                    $testButton.prop('disabled', false);
+                } else {
+                    $configBox.hide();
+                    $testButton.prop('disabled', true);
+                }
             });
-          } else {
-            swal({
-              type: 'error',
-              title: 'Connection Failed',
-              text: response.message
-            });
-          }
-        })
-        .fail(function(xhr) {
-          const response = xhr.responseJSON || {};
-          swal({
-            type: 'error',
-            title: 'Connection Failed',
-            text: response.message || 'An unexpected error occurred.'
-          });
-        })
-        .always(function() {
-          $button.prop('disabled', false);
-          $spinner.hide();
-        });
-      });
 
-      // Load provider configuration
-      function loadProviderConfig(provider) {
-        $.get(`{{ route('admin.settings.domains.provider-schema', ':provider') }}`.replace(':provider', provider))
-          .done(function(response) {
-            if (response.success) {
-              renderConfigForm(response.schema);
-              $configBox.show();
+            // Test connection
+            $testButton.click(function() {
+                const formData = {
+                    dns_provider: $providerSelect.val(),
+                    dns_config: {}
+                };
+
+                // Collect DNS config fields
+                $configContent.find('input').each(function() {
+                    const name = $(this).attr('name');
+                    if (name && name.startsWith('dns_config[')) {
+                        const key = name.replace('dns_config[', '').replace(']', '');
+                        formData.dns_config[key] = $(this).val();
+                    }
+                });
+
+                $testButton.prop('disabled', true);
+                $testSpinner.removeClass('hidden');
+
+                $.post('{{ route('admin.settings.domains.test-connection') }}', {
+                        _token: '{{ csrf_token() }}',
+                        ...formData
+                    })
+                    .done(function(response) {
+                        if (response.success) {
+                            swal({
+                                type: 'success',
+                                title: 'Connection Successful',
+                                text: response.message
+                            });
+                        } else {
+                            swal({
+                                type: 'error',
+                                title: 'Connection Failed',
+                                text: response.message
+                            });
+                        }
+                    })
+                    .fail(function(xhr) {
+                        const response = xhr.responseJSON || {};
+                        swal({
+                            type: 'error',
+                            title: 'Connection Failed',
+                            text: response.message || 'An unexpected error occurred.'
+                        });
+                    })
+                    .always(function() {
+                        $testButton.prop('disabled', false);
+                        $testSpinner.addClass('hidden');
+                    });
+            });
+
+            // Load provider configuration
+            function loadProviderConfig(provider) {
+                $.get(`{{ route('admin.settings.domains.provider-schema', ':provider') }}`.replace(':provider',
+                        provider))
+                    .done(function(response) {
+                        if (response.success) {
+                            renderConfigForm(response.schema);
+                            $configBox.show();
+                        }
+                    })
+                    .fail(function() {
+                        $configBox.hide();
+                    });
             }
-          })
-          .fail(function() {
-            $configBox.hide();
-          });
-      }
 
-      // Render configuration form
-      function renderConfigForm(schema) {
-        let html = '<div class="row">';
-        
-        Object.keys(schema).forEach(function(key) {
-          const field = schema[key];
-          const oldValue = existingConfig[key] || '';
-          
-          html += `
-            <div class="form-group col-md-6">
-              <label for="dns_config_${key}" class="control-label">
-                ${field.description || key} 
-                ${field.required ? '<span class="field-required"></span>' : ''}
-              </label>
-              <div>
-                <input type="${field.sensitive ? 'password' : 'text'}" 
-                       name="dns_config[${key}]" 
-                       id="dns_config_${key}" 
-                       class="form-control" 
-                       value="${oldValue}"
-                       ${field.required ? 'required' : ''} />
-              </div>
-            </div>
-          `;
+            // Render configuration form
+            function renderConfigForm(schema) {
+                let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-8">';
+
+                Object.keys(schema).forEach(function(key) {
+                    const field = schema[key];
+                    const oldValue = existingConfig[key] || '';
+
+                    html += `
+                        <div class="form-control w-full">
+                            <label for="dns_config_${key}" class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">
+                                    ${field.description || key} 
+                                    ${field.required ? '<span class="badge badge-ghost badge-soft badge-xs ml-1 font-bold uppercase tracking-tighter">Required</span>' : ''}
+                                </span>
+                            </label>
+                            <input type="${field.sensitive ? 'password' : 'text'}" 
+                                   name="dns_config[${key}]" 
+                                   id="dns_config_${key}" 
+                                   class="input input-bordered focus:input-primary w-full transition-all" 
+                                   value="${oldValue}"
+                                   ${field.required ? 'required' : ''} />
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                $configContent.html(html);
+            }
+
+            // Trigger change if provider is pre-selected
+            if ($providerSelect.val()) {
+                $providerSelect.trigger('change');
+            }
         });
-        
-        html += '</div>';
-        $configContent.html(html);
-      }
-
-      // Trigger change if provider is pre-selected
-      if ($providerSelect.val()) {
-        $providerSelect.trigger('change');
-      }
-    });
-  </script>
+    </script>
 @endsection

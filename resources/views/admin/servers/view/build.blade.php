@@ -5,215 +5,308 @@
 @endsection
 
 @section('content-header')
-    <h1>{{ $server->name }}<small>Control allocations and system resources for this server.</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.servers') }}">Servers</a></li>
-        <li><a href="{{ route('admin.servers.view', $server->id) }}">{{ $server->name }}</a></li>
-        <li class="active">Build Configuration</li>
-    </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter">{{ $server->name }}</h1>
+            <p class="text-base-content/60 text-sm">Control allocations and system resources for this server.</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.servers') }}">Servers</a></li>
+                <li><a href="{{ route('admin.servers.view', $server->id) }}">{{ $server->name }}</a></li>
+                <li class="text-primary">Build Configuration</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-@include('admin.servers.partials.navigation')
-<div class="row">
+    @include('admin.servers.partials.navigation')
+
     <form action="{{ route('admin.servers.view.build', $server->id) }}" method="POST">
-        <div class="col-sm-5">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Resource Management</h3>
-                </div>
-                <div class="box-body">
-                <div class="form-group">
-                        <label for="cpu" class="control-label">CPU Limit</label>
-                        <div class="input-group">
-                            <input type="text" name="cpu" class="form-control" value="{{ old('cpu', $server->cpu) }}"/>
-                            <span class="input-group-addon">%</span>
-                        </div>
-                        <p class="text-muted small">Each <em>virtual</em> core (thread) on the system is considered to be <code>100%</code>. Setting this value to <code>0</code> will allow a server to use CPU time without restrictions.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="threads" class="control-label">CPU Pinning</label>
-                        <div>
-                            <input type="text" name="threads" class="form-control" value="{{ old('threads', $server->threads) }}"/>
-                        </div>
-                        <p class="text-muted small"><strong>Advanced:</strong> Enter the specific CPU cores that this process can run on, or leave blank to allow all cores. This can be a single number, or a comma seperated list. Example: <code>0</code>, <code>0-1,3</code>, or <code>0,1,3,4</code>.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="memory" class="control-label">Allocated Memory</label>
-                        <div class="input-group">
-                            <input type="text" name="memory" data-multiplicator="true" class="form-control" value="{{ old('memory', $server->memory) }}"/>
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-                        <p class="text-muted small">The maximum amount of memory allowed for this container. Setting this to <code>0</code> will allow unlimited memory in a container.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="overhead_memory" class="control-label">Overhead Memory</label>
-                        <div class="input-group">
-                            <input type="text" name="overhead_memory" data-multiplicator="true" class="form-control" value="{{ old('overhead_memory', $server->overhead_memory) }}"/>
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-                        <p class="text-muted small">Additional memory allocated to the container that doesn't go to the SERVER_MEMORY variable. Setting to <code>0</code> disables overhead memory.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="swap" class="control-label">Allocated Swap</label>
-                        <div class="input-group">
-                            <input type="text" name="swap" data-multiplicator="true" class="form-control" value="{{ old('swap', $server->swap) }}"/>
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-                        <p class="text-muted small">Setting this to <code>0</code> will disable swap space on this server. Setting to <code>-1</code> will allow unlimited swap.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="cpu" class="control-label">Disk Space Limit</label>
-                        <div class="input-group">
-                            <input type="text" name="disk" class="form-control" value="{{ old('disk', $server->disk) }}"/>
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-                        <p class="text-muted small">This server will not be allowed to boot if it is using more than this amount of space. If a server goes over this limit while running it will be safely stopped and locked until enough space is available. Set to <code>0</code> to allow unlimited disk usage.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="io" class="control-label">Block IO Proportion</label>
-                        <div>
-                            <input type="text" name="io" class="form-control" value="{{ old('io', $server->io) }}"/>
-                        </div>
-                        <p class="text-muted small"><strong>Advanced</strong>: The IO performance of this server relative to other <em>running</em> containers on the system. Value should be between <code>10</code> and <code>1000</code>.</code></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="cpu" class="control-label">OOM Killer</label>
-                        <div>
-                            <div class="radio radio-danger radio-inline">
-                                <input type="radio" id="pOomKillerEnabled" value="0" name="oom_disabled" @if(!$server->oom_disabled)checked @endif>
-                                <label for="pOomKillerEnabled">Enabled</label>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Resource Management -->
+            <div class="lg:col-span-5 space-y-8">
+                <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+                    <div class="card-body space-y-6">
+                        <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Resource Management</h3>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">CPU Limit</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" name="cpu"
+                                    class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                    value="{{ old('cpu', $server->cpu) }}" />
+                                <span class="btn btn-disabled join-item">%</span>
                             </div>
-                            <div class="radio radio-success radio-inline">
-                                <input type="radio" id="pOomKillerDisabled" value="1" name="oom_disabled" @if($server->oom_disabled)checked @endif>
-                                <label for="pOomKillerDisabled">Disabled</label>
-                            </div>
-                            <p class="text-muted small">
-                                Enabling OOM killer may cause server processes to exit unexpectedly.
-                            </p>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Each core is <code>100%</code>. Set to
+                                    <code>0</code> for unlimited.</span>
+                            </label>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="exclude_from_resource_calculation" class="control-label">Resource Calculation</label>
-                        <div>
-                            <div class="radio radio-success radio-inline">
-                                <input type="radio" id="pResourceCalcIncluded" value="0" name="exclude_from_resource_calculation" @if(!$server->exclude_from_resource_calculation)checked @endif>
-                                <label for="pResourceCalcIncluded">Included</label>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">CPU Pinning</span>
+                            </label>
+                            <input type="text" name="threads"
+                                class="input input-bordered focus:input-primary transition-all"
+                                value="{{ old('threads', $server->threads) }}" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">Advanced: Specific cores (e.g.
+                                    <code>0,1,3</code>). Leave blank for all.</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Allocated Memory</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="memory" data-multiplicator="true"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                        value="{{ old('memory', $server->memory) }}" />
+                                    <span class="btn btn-disabled join-item">MiB</span>
+                                </div>
                             </div>
-                            <div class="radio radio-warning radio-inline">
-                                <input type="radio" id="pResourceCalcExcluded" value="1" name="exclude_from_resource_calculation" @if($server->exclude_from_resource_calculation)checked @endif>
-                                <label for="pResourceCalcExcluded">Excluded</label>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Overhead Memory</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="overhead_memory" data-multiplicator="true"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                        value="{{ old('overhead_memory', $server->overhead_memory) }}" />
+                                    <span class="btn btn-disabled join-item">MiB</span>
+                                </div>
                             </div>
-                            <p class="text-muted small">
-                                When enabled, this server will not be included in resource calculations when provisioning new servers onto this node. Useful for testing or development servers.
-                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Allocated Swap</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="swap" data-multiplicator="true"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                        value="{{ old('swap', $server->swap) }}" />
+                                    <span class="btn btn-disabled join-item">MiB</span>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Disk Space Limit</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="disk"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                        value="{{ old('disk', $server->disk) }}" />
+                                    <span class="btn btn-disabled join-item">MiB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Block IO Proportion</span>
+                            </label>
+                            <input type="text" name="io"
+                                class="input input-bordered focus:input-primary transition-all"
+                                value="{{ old('io', $server->io) }}" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">Advanced: Value between
+                                    <code>10</code> and <code>1000</code>.</span>
+                            </label>
+                        </div>
+
+                        <div class="divider">Safety & Provisioning</div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">OOM Killer</span>
+                            </label>
+                            <div class="flex gap-6">
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" value="0" name="oom_disabled" class="radio radio-error"
+                                        @if (!$server->oom_disabled) checked @endif>
+                                    <span class="label-text">Enabled</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" value="1" name="oom_disabled" class="radio radio-success"
+                                        @if ($server->oom_disabled) checked @endif>
+                                    <span class="label-text">Disabled</span>
+                                </label>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">Enabling OOM killer may cause
+                                    processes to exit unexpectedly.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Resource Calculation</span>
+                            </label>
+                            <div class="flex gap-6">
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" value="0" name="exclude_from_resource_calculation"
+                                        class="radio radio-success" @if (!$server->exclude_from_resource_calculation) checked @endif>
+                                    <span class="label-text">Included</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" value="1" name="exclude_from_resource_calculation"
+                                        class="radio radio-warning" @if ($server->exclude_from_resource_calculation) checked @endif>
+                                    <span class="label-text">Excluded</span>
+                                </label>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">Excluded servers won't count
+                                    towards node capacity during provisioning.</span>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-sm-7">
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Application Feature Limits</h3>
-                        </div>
-                        <div class="box-body">
-                            <div class="row">
-                                <div class="form-group col-xs-6">
-                                    <label for="database_limit" class="control-label">Database Limit</label>
-                                    <div>
-                                        <input type="text" name="database_limit" class="form-control" value="{{ old('database_limit', $server->database_limit) }}"/>
-                                    </div>
-                                    <p class="text-muted small">The total number of databases a user is allowed to create for this server. Leave blank for unlimited, set to 0 to disable.</p>
-                                </div>
-                                <div class="form-group col-xs-6">
-                                    <label for="allocation_limit" class="control-label">Allocation Limit</label>
-                                    <div>
-                                        <input type="text" name="allocation_limit" class="form-control" value="{{ old('allocation_limit', $server->allocation_limit) }}"/>
-                                    </div>
-                                    <p class="text-muted small">The total number of allocations a user is allowed to create for this server. Leave blank for unlimited, set to 0 to disable.</p>
-                                </div>
-                                <div class="form-group col-xs-6">
-                                    <label for="backup_limit" class="control-label">Backup Limit</label>
-                                    <div>
-                                        <input type="text" name="backup_limit" class="form-control" value="{{ old('backup_limit', $server->backup_limit) }}"/>
-                                    </div>
-                                    <p class="text-muted small">The total number of backups that can be created for this server. Leave blank for unlimited, set to 0 to disable.</p>
-                                </div>
-                                <div class="form-group col-xs-6">
-                                    <label for="backup_storage_limit" class="control-label">Backup Storage Limit</label>
-                                    <div class="input-group">
-                                        <input type="text" name="backup_storage_limit" data-multiplicator="true" class="form-control" value="{{ old('backup_storage_limit', $server->backup_storage_limit) }}"/>
-                                        <span class="input-group-addon">MiB</span>
-                                    </div>
-                                    <p class="text-muted small">The total storage space that can be used for backups. Leave blank for unlimited storage.</p>
+
+            <!-- Limits & Allocation -->
+            <div class="lg:col-span-7 space-y-8">
+                <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+                    <div class="card-body space-y-6">
+                        <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Application Feature
+                            Limits</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Database Limit</span>
+                                </label>
+                                <input type="text" name="database_limit"
+                                    class="input input-bordered focus:input-primary transition-all"
+                                    value="{{ old('database_limit', $server->database_limit) }}" />
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Allocation Limit</span>
+                                </label>
+                                <input type="text" name="allocation_limit"
+                                    class="input input-bordered focus:input-primary transition-all"
+                                    value="{{ old('allocation_limit', $server->allocation_limit) }}" />
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Backup Limit</span>
+                                </label>
+                                <input type="text" name="backup_limit"
+                                    class="input input-bordered focus:input-primary transition-all"
+                                    value="{{ old('backup_limit', $server->backup_limit) }}" />
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Backup Storage Limit</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="backup_storage_limit" data-multiplicator="true"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all"
+                                        value="{{ old('backup_storage_limit', $server->backup_storage_limit) }}" />
+                                    <span class="btn btn-disabled join-item">MiB</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12">
-                    <div class="box">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Allocation Management</h3>
+
+                <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+                    <div class="card-body space-y-6">
+                        <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Allocation Management
+                        </h3>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Game Port</span>
+                            </label>
+                            <select id="pAllocation" name="allocation_id"
+                                class="select select-bordered focus:select-primary">
+                                @foreach ($assigned as $assignment)
+                                    <option value="{{ $assignment->id }}"
+                                        @if ($assignment->id === $server->allocation_id) selected="selected" @endif>
+                                        {{ $assignment->alias }}:{{ $assignment->port }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 italic">The default connection address for
+                                    this server.</span>
+                            </label>
                         </div>
-                        <div class="box-body">
-                            <div class="form-group">
-                                <label for="pAllocation" class="control-label">Game Port</label>
-                                <select id="pAllocation" name="allocation_id" class="form-control">
-                                    @foreach ($assigned as $assignment)
-                                        <option value="{{ $assignment->id }}"
-                                            @if($assignment->id === $server->allocation_id)
-                                                selected="selected"
-                                            @endif
-                                        >{{ $assignment->alias }}:{{ $assignment->port }}</option>
-                                    @endforeach
-                                </select>
-                                <p class="text-muted small">The default connection address that will be used for this game server.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pAddAllocations" class="control-label">Assign Additional Ports</label>
-                                <div>
-                                    <select name="add_allocations[]" class="form-control" multiple id="pAddAllocations">
-                                        @foreach ($unassigned as $assignment)
-                                            <option value="{{ $assignment->id }}">{{ $assignment->alias }}:{{ $assignment->port }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <p class="text-muted small">Please note that due to software limitations you cannot assign identical ports on different IPs to the same server.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pRemoveAllocations" class="control-label">Remove Additional Ports</label>
-                                <div>
-                                    <select name="remove_allocations[]" class="form-control" multiple id="pRemoveAllocations">
-                                        @foreach ($assigned as $assignment)
-                                            <option value="{{ $assignment->id }}">{{ $assignment->alias }}:{{ $assignment->port }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <p class="text-muted small">Simply select which ports you would like to remove from the list above. If you want to assign a port on a different IP that is already in use you can select it from the left and delete it here.</p>
-                            </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Assign Additional Ports</span>
+                            </label>
+                            <select name="add_allocations[]" class="select2-daisy w-full" multiple id="pAddAllocations">
+                                @foreach ($unassigned as $assignment)
+                                    <option value="{{ $assignment->id }}">
+                                        {{ $assignment->alias }}:{{ $assignment->port }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="box-footer">
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold text-error">Remove Additional Ports</span>
+                            </label>
+                            <select name="remove_allocations[]" class="select2-daisy w-full" multiple
+                                id="pRemoveAllocations">
+                                @foreach ($assigned as $assignment)
+                                    <option value="{{ $assignment->id }}">
+                                        {{ $assignment->alias }}:{{ $assignment->port }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="pt-4 flex justify-end border-t border-base-300">
                             {!! csrf_field() !!}
-                            <button type="submit" class="btn btn-primary pull-right">Update Build Configuration</button>
+                            <button type="submit" class="btn btn-primary px-8">Update Build Configuration</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </form>
-</div>
 @endsection
 
 @section('footer-scripts')
     @parent
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            @apply bg-base-100 border-base-300 rounded-lg min-h-[3rem] p-1;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            @apply border-primary ring-1 ring-primary;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            @apply bg-primary text-primary-content border-none rounded px-2 py-0.5 mt-1;
+        }
+
+        .select2-dropdown {
+            @apply bg-base-200 border-base-300 shadow-2xl rounded-lg overflow-hidden;
+        }
+    </style>
     <script>
-    $('#pAddAllocations').select2();
-    $('#pRemoveAllocations').select2();
-    $('#pAllocation').select2();
+        $(document).ready(function() {
+            $('#pAddAllocations').select2({
+                placeholder: 'Select ports to add...'
+            });
+            $('#pRemoveAllocations').select2({
+                placeholder: 'Select ports to remove...'
+            });
+            $('#pAllocation').select2();
+        });
     </script>
 @endsection

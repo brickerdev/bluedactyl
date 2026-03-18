@@ -5,124 +5,168 @@
 @endsection
 
 @section('content-header')
-    <h1>Create User<small>Add a new user to the system.</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.users') }}">Users</a></li>
-        <li class="active">Create</li>
-    </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter text-base-content uppercase">Create User</h1>
+            <p class="text-base-content/60 text-sm font-medium">Add a new user to the system.</p>
+        </div>
+        <div class="text-sm breadcrumbs text-base-content/60 font-medium">
+            <ul>
+                <li><a href="{{ route('admin.index') }}" class="hover:text-primary transition-colors">Admin</a></li>
+                <li><a href="{{ route('admin.users') }}" class="hover:text-primary transition-colors">Users</a></li>
+                <li class="text-base-content">Create</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-<div class="row">
     <form method="post">
-        <div class="col-md-6">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Identity</h3>
-                </div>
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="email" class="control-label">Email</label>
-                        <div>
-                            <input type="text" autocomplete="off" name="email" value="{{ old('email') }}" class="form-control" />
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Identity Section --}}
+            <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-sm">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-id-card text-xl"></i>
                         </div>
+                        <h2 class="text-xl font-black tracking-tight uppercase">Identity</h2>
                     </div>
-                    <div class="form-group">
-                        <label for="username" class="control-label">Username</label>
-                        <div>
-                            <input type="text" autocomplete="off" name="username" value="{{ old('username') }}" class="form-control" />
+
+                    <div class="space-y-4">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Email Address</span>
+                            </label>
+                            <input type="text" autocomplete="off" name="email" value="{{ old('email') }}" class="input input-bordered w-full bg-base-100 focus:border-primary transition-all" required />
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="name_first" class="control-label">Client First Name</label>
-                        <div>
-                            <input type="text" autocomplete="off" name="name_first" value="{{ old('name_first') }}" class="form-control" />
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Username</span>
+                            </label>
+                            <input type="text" autocomplete="off" name="username" value="{{ old('username') }}" class="input input-bordered w-full bg-base-100 focus:border-primary transition-all" required />
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="name_last" class="control-label">Client Last Name</label>
-                        <div>
-                            <input type="text" autocomplete="off" name="name_last" value="{{ old('name_last') }}" class="form-control" />
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">First Name</span>
+                                </label>
+                                <input type="text" autocomplete="off" name="name_first" value="{{ old('name_first') }}" class="input input-bordered w-full bg-base-100 focus:border-primary transition-all" required />
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Last Name</span>
+                                </label>
+                                <input type="text" autocomplete="off" name="name_last" value="{{ old('name_last') }}" class="input input-bordered w-full bg-base-100 focus:border-primary transition-all" required />
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">Default Language</label>
-                        <div>
-                            <select name="language" class="form-control">
-                                @foreach($languages as $key => $value)
-                                    <option value="{{ $key }}" @if(config('app.locale') === $key) selected @endif>{{ $value }}</option>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Default Language</span>
+                            </label>
+                            <select name="language" class="select select-bordered w-full bg-base-100">
+                                @foreach ($languages as $key => $value)
+                                    <option value="{{ $key }}" @if (config('app.locale') === $key) selected @endif>{{ $value }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-muted"><small>The default language to use when rendering the Panel for this user.</small></p>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/40 italic">The default language for this user's panel.</span>
+                            </label>
                         </div>
                     </div>
                 </div>
-                <div class="box-footer">
-                    {!! csrf_field() !!}
-                    <input type="submit" value="Create User" class="btn btn-success btn-sm">
-                </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Permissions</h3>
-                </div>
-                <div class="box-body">
-                    <div class="form-group col-md-12">
-                        <label for="root_admin" class="control-label">Administrator</label>
-                        <div>
-                            <select name="root_admin" class="form-control">
+
+            <div class="space-y-6">
+                {{-- Permissions Section --}}
+                <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-sm">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-shield text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-black tracking-tight uppercase">Permissions</h2>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Administrator Status</span>
+                            </label>
+                            <select name="root_admin" class="select select-bordered w-full bg-base-100">
                                 <option value="0">@lang('strings.no')</option>
                                 <option value="1">@lang('strings.yes')</option>
                             </select>
-                            <p class="text-muted"><small>Setting this to 'Yes' gives a user full administrative access.</small></p>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/40 italic">Gives the user full administrative access to the panel.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Password Section --}}
+                <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-sm">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-key text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-black tracking-tight uppercase">Password</h2>
+                        </div>
+
+                        <div class="alert alert-soft alert-info mb-4 py-3 px-4 rounded-lg border-none">
+                            <i class="fa fa-info-circle text-info"></i>
+                            <span class="text-xs font-medium">Providing a password is optional. New users will be prompted to create one on their first login.</span>
+                        </div>
+
+                        <div id="gen_pass" class="alert alert-soft alert-success mb-4 hidden py-2 px-4 rounded-lg border-none font-mono text-xs"></div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Password</span>
+                                <button type="button" id="gen_pass_bttn" class="label-text-alt link link-primary font-bold uppercase text-[10px] tracking-wider no-underline hover:underline">Generate Random</button>
+                            </label>
+                            <input type="password" name="password" class="input input-bordered w-full bg-base-100 focus:border-primary transition-all" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Password</h3>
-                </div>
-                <div class="box-body">
-                    <div class="alert alert-info">
-                        <p>Providing a user password is optional. New user emails prompt users to create a password the first time they login. If a password is provided here you will need to find a different method of providing it to the user.</p>
-                    </div>
-                    <div id="gen_pass" class=" alert alert-success" style="display:none;margin-bottom: 10px;"></div>
-                    <div class="form-group">
-                        <label for="pass" class="control-label">Password</label>
-                        <div>
-                            <input type="password" name="password" class="form-control" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+            {!! csrf_field() !!}
+            <a href="{{ route('admin.users') }}" class="btn btn-ghost font-bold uppercase tracking-wider">Cancel</a>
+            <button type="submit" class="btn btn-primary px-12 font-bold uppercase tracking-wider shadow-lg shadow-primary/20">
+                <i class="fa fa-user-plus mr-2"></i> Create User Account
+            </button>
         </div>
     </form>
-</div>
 @endsection
 
 @section('footer-scripts')
     @parent
-    <script>$("#gen_pass_bttn").click(function (event) {
+    <script>
+        $("#gen_pass_bttn").click(function(event) {
             event.preventDefault();
+            const btn = $(this);
+            btn.addClass('opacity-50 pointer-events-none');
+            
             $.ajax({
                 type: "GET",
                 url: "/password-gen/12",
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-               },
+                },
                 success: function(data) {
-                    $("#gen_pass").html('<strong>Generated Password:</strong> ' + data).slideDown();
-                    $('input[name="password"], input[name="password_confirmation"]').val(data);
-                    return false;
+                    $("#gen_pass").html('<strong>Generated Password:</strong> <span class="select-all">' + data + '</span>').removeClass('hidden').slideDown();
+                    $('input[name="password"]').val(data);
+                },
+                complete: function() {
+                    btn.removeClass('opacity-50 pointer-events-none');
                 }
             });
-            return false;
         });
     </script>
 @endsection

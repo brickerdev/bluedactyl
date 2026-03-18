@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import ActionButton from '@/components/elements/ActionButton';
-import ContentBox from '@/components/elements/ContentBox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { ModCard } from './ModCard';
 import { ModrinthService, useGlobalStateContext } from './config';
@@ -172,9 +172,14 @@ const LoadingSpinner = () => (
 );
 
 const ErrorDisplay = ({ message }: { message: string }) => (
-    <ContentBox>
-        <div className='text-red-500 p-4'>{message}</div>
-    </ContentBox>
+    <Card>
+        <CardHeader>
+            <CardTitle>Mods</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <div className='flex justify-center py-8'></div>
+        </CardContent>
+    </Card>
 );
 
 const EmptyState = () => (

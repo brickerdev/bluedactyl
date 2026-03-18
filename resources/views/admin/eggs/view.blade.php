@@ -5,218 +5,376 @@
 @endsection
 
 @section('content-header')
-    <h1>{{ $egg->name }}<small>{{ str_limit($egg->description, 50) }}</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.nests') }}">Nests</a></li>
-        <li><a href="{{ route('admin.nests.view', $egg->nest->id) }}">{{ $egg->nest->name }}</a></li>
-        <li class="active">{{ $egg->name }}</li>
-    </ol>
-@endsection
-
-@section('content')
-<div class="row">
-    <div class="col-xs-12">
-        <div class="nav-tabs-custom nav-tabs-floating">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="{{ route('admin.nests.egg.view', $egg->id) }}">Configuration</a></li>
-                <li><a href="{{ route('admin.nests.egg.variables', $egg->id) }}">Variables</a></li>
-                <li><a href="{{ route('admin.nests.egg.scripts', $egg->id) }}">Install Script</a></li>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter uppercase">{{ $egg->name }}</h1>
+            <p class="text-base-content/60 text-sm">{{ str_limit($egg->description, 50) }}</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.nests') }}">Nests</a></li>
+                <li><a href="{{ route('admin.nests.view', $egg->nest->id) }}">{{ $egg->nest->name }}</a></li>
+                <li class="text-primary font-bold">{{ $egg->name }}</li>
             </ul>
         </div>
     </div>
-</div>
-<form action="{{ route('admin.nests.egg.view', $egg->id) }}" enctype="multipart/form-data" method="POST">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box box-danger">
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-xs-8">
-                            <div class="form-group no-margin-bottom">
-                                <label for="pName" class="control-label">Egg File</label>
-                                <div>
-                                    <input type="file" name="import_file" class="form-control" style="border: 0;margin-left:-10px;" />
-                                    <p class="text-muted small no-margin-bottom">If you would like to replace settings for this Egg by uploading a new JSON file, simply select it here and press "Update Egg". This will not change any existing startup strings or Docker images for existing servers.</p>
-                                </div>
+@endsection
+
+@section('content')
+    <div class="flex flex-col gap-6">
+        <div class="tabs tabs-box bg-base-200/50 p-1 rounded-xl inline-flex border border-base-300 w-fit">
+            <a href="{{ route('admin.nests.egg.view', $egg->id) }}"
+                class="tab tab-active !rounded-lg font-bold uppercase tracking-wide text-xs">Configuration</a>
+            <a href="{{ route('admin.nests.egg.variables', $egg->id) }}"
+                class="tab !rounded-lg font-bold uppercase tracking-wide text-xs">Variables</a>
+            <a href="{{ route('admin.nests.egg.scripts', $egg->id) }}"
+                class="tab !rounded-lg font-bold uppercase tracking-wide text-xs">Install Script</a>
+        </div>
+
+        <form action="{{ route('admin.nests.egg.view', $egg->id) }}" enctype="multipart/form-data" method="POST">
+            <div class="card bg-error/5 border border-error/20 shadow-xl backdrop-blur-md">
+                <div class="card-body p-4">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center shrink-0">
+                                <i class="ri-file-upload-line text-error text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold uppercase tracking-tight text-error">Update Egg File</h3>
+                                <p class="text-xs text-base-content/60">Upload a new JSON file to replace settings. This
+                                    won't change existing servers.</p>
                             </div>
                         </div>
-                        <div class="col-xs-4">
+                        <div class="flex items-center gap-4 w-full md:w-auto">
+                            <input type="file" name="import_file"
+                                class="file-input file-input-bordered file-input-error file-input-sm w-full md:w-64" />
                             {!! csrf_field() !!}
-                            <button type="submit" name="_method" value="PUT" class="btn btn-sm btn-danger pull-right">Update Egg</button>
+                            <button type="submit" name="_method" value="PUT"
+                                class="btn btn-error btn-sm font-bold uppercase tracking-wider">
+                                Update Egg
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</form>
-<form action="{{ route('admin.nests.egg.view', $egg->id) }}" method="POST">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Configuration</h3>
+        </form>
+
+        <form action="{{ route('admin.nests.egg.view', $egg->id) }}" method="POST">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {{-- Configuration Card --}}
+                <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <i class="ri-settings-4-line text-primary text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Configuration</h3>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Name <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <input type="text" name="name" value="{{ $egg->name }}"
+                                    class="input input-bordered w-full focus:input-primary transition-all" />
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">A simple, human-readable name to use
+                                        as an identifier for this Egg.</span>
+                                </label>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">UUID</span>
+                                </label>
+                                <input type="text" readonly value="{{ $egg->uuid }}"
+                                    class="input input-bordered w-full bg-base-300/50 cursor-not-allowed" />
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">Globally unique identifier for this
+                                        Egg used by the Daemon.</span>
+                                </label>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Author</span>
+                                </label>
+                                <input type="text" readonly value="{{ $egg->author }}"
+                                    class="input input-bordered w-full bg-base-300/50 cursor-not-allowed" />
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">The author of this version of the
+                                        Egg.</span>
+                                </label>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Docker Images <span
+                                            class="text-error">*</span></span>
+                                </label>
+                                <textarea name="docker_images"
+                                    class="textarea textarea-bordered w-full h-32 focus:textarea-primary transition-all font-mono text-sm">{{ implode(PHP_EOL, $images) }}</textarea>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">One per line. Use <code>Display
+                                            Name|image:tag</code> for custom labels.</span>
+                                </label>
+                            </div>
+
+                            <div class="form-control">
+                                <label
+                                    class="label cursor-pointer justify-start gap-4 p-4 bg-base-300/30 rounded-xl border border-base-300/50 hover:bg-base-300/50 transition-all">
+                                    <input type="checkbox" name="force_outgoing_ip" value="1"
+                                        class="checkbox checkbox-primary"
+                                        @if ($egg->force_outgoing_ip) checked @endif />
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Force Outgoing
+                                        IP</span>
+                                </label>
+                                <div class="mt-2 px-2">
+                                    <p class="text-xs text-base-content/60">Forces all outgoing network traffic to have its
+                                        Source IP NATed to the server's primary allocation IP.</p>
+                                    <p class="text-xs text-error font-bold mt-1 italic">Enabling this will disable internal
+                                        networking for servers using this egg.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="pName" class="control-label">Name <span class="field-required"></span></label>
-                                <input type="text" id="pName" name="name" value="{{ $egg->name }}" class="form-control" />
-                                <p class="text-muted small">A simple, human-readable name to use as an identifier for this Egg.</p>
+
+                {{-- Description & Startup Card --}}
+                <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                                <i class="ri-terminal-box-line text-secondary text-xl"></i>
                             </div>
-                            <div class="form-group">
-                                <label for="pUuid" class="control-label">UUID</label>
-                                <input type="text" id="pUuid" readonly value="{{ $egg->uuid }}" class="form-control" />
-                                <p class="text-muted small">This is the globally unique identifier for this Egg which the Daemon uses as an identifier.</p>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Details & Startup</h3>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Description</span>
+                                </label>
+                                <textarea name="description" class="textarea textarea-bordered w-full h-32 focus:textarea-primary transition-all">{{ $egg->description }}</textarea>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">A description of this Egg displayed
+                                        throughout the Panel.</span>
+                                </label>
                             </div>
-                            <div class="form-group">
-                                <label for="pAuthor" class="control-label">Author</label>
-                                <input type="text" id="pAuthor" readonly value="{{ $egg->author }}" class="form-control" />
-                                <p class="text-muted small">The author of this version of the Egg. Uploading a new Egg configuration from a different author will change this.</p>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Startup Command
+                                        <span class="text-error">*</span></span>
+                                </label>
+                                <textarea name="startup"
+                                    class="textarea textarea-bordered w-full h-32 focus:textarea-primary transition-all font-mono text-sm">{{ $egg->startup }}</textarea>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">The default startup command for new
+                                        servers using this Egg.</span>
+                                </label>
                             </div>
-                            <div class="form-group">
-                                <label for="pDockerImage" class="control-label">Docker Images <span class="field-required"></span></label>
-                                <textarea id="pDockerImages" name="docker_images" class="form-control" rows="4">{{ implode(PHP_EOL, $images) }}</textarea>
-                                <p class="text-muted small">
-                                    The docker images available to servers using this egg. Enter one per line. Users
-                                    will be able to select from this list of images if more than one value is provided.
-                                    Optionally, a display name may be provided by prefixing the image with the name
-                                    followed by a pipe character, and then the image URL. Example: <code>Display Name|ghcr.io/my/egg</code>
-                                </p>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Features</span>
+                                </label>
+                                <select class="select2-features w-full" name="features[]" multiple>
+                                    @foreach ($egg->features ?? [] as $feature)
+                                        <option value="{{ $feature }}" selected>{{ $feature }}</option>
+                                    @endforeach
+                                </select>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">Additional features belonging to the
+                                        egg.</span>
+                                </label>
                             </div>
-                            <div class="form-group">
-                                <div class="checkbox checkbox-primary no-margin-bottom">
-                                    <input id="pForceOutgoingIp" name="force_outgoing_ip" type="checkbox" value="1" @if($egg->force_outgoing_ip) checked @endif />
-                                    <label for="pForceOutgoingIp" class="strong">Force Outgoing IP</label>
-                                    <p class="text-muted small">
-                                        Forces all outgoing network traffic to have its Source IP NATed to the IP of the server's primary allocation IP.
-                                        Required for certain games to work properly when the Node has multiple public IP addresses.
-                                        <br>
-                                        <strong>
-                                            Enabling this option will disable internal networking for any servers using this egg,
-                                            causing them to be unable to internally access other servers on the same node.
-                                        </strong>
-                                    </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Process Management Card --}}
+                <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md lg:col-span-2">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                                <i class="ri-cpu-line text-warning text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Process Management</h3>
+                        </div>
+
+                        <div class="alert alert-soft alert-warning mb-6">
+                            <i class="ri-error-warning-line text-xl"></i>
+                            <div class="text-sm">
+                                <p class="font-bold uppercase tracking-wide">Advanced Configuration</p>
+                                <p>Do not edit these unless you understand how the system works. Wrong modifications can
+                                    break the daemon.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold uppercase tracking-wide text-xs">Copy Settings
+                                            From</span>
+                                    </label>
+                                    <select name="config_from" id="pConfigFrom" class="select2-config w-full">
+                                        <option value="">None</option>
+                                        @foreach ($egg->nest->eggs as $o)
+                                            <option value="{{ $o->id }}"
+                                                {{ $egg->config_from !== $o->id ?: 'selected' }}>{{ $o->name }}
+                                                <{{ $o->author }}>
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/50">Default to settings from another
+                                            Egg.</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold uppercase tracking-wide text-xs">Stop
+                                            Command</span>
+                                    </label>
+                                    <input type="text" name="config_stop"
+                                        class="input input-bordered w-full focus:input-primary transition-all"
+                                        value="{{ $egg->config_stop }}" />
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/50">Command to stop processes
+                                            gracefully (e.g. <code>^C</code> for SIGINT).</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold uppercase tracking-wide text-xs">Log
+                                            Configuration</span>
+                                    </label>
+                                    <textarea data-action="handle-tabs" name="config_logs"
+                                        class="textarea textarea-bordered w-full h-48 focus:textarea-primary transition-all font-mono text-sm">{{ !is_null($egg->config_logs) ? json_encode(json_decode($egg->config_logs), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/50">JSON representation of log file
+                                            storage and custom logs.</span>
+                                    </label>
                                 </div>
                             </div>
 
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="pDescription" class="control-label">Description</label>
-                                <textarea id="pDescription" name="description" class="form-control" rows="8">{{ $egg->description }}</textarea>
-                                <p class="text-muted small">A description of this Egg that will be displayed throughout the Panel as needed.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pStartup" class="control-label">Startup Command <span class="field-required"></span></label>
-                                <textarea id="pStartup" name="startup" class="form-control" rows="8">{{ $egg->startup }}</textarea>
-                                <p class="text-muted small">The default startup command that should be used for new servers using this Egg.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pConfigFeatures" class="control-label">Features</label>
-                                <div>
-                                    <select class="form-control" name="features[]" id="pConfigFeatures" multiple>
-                                        @foreach(($egg->features ?? []) as $feature)
-                                            <option value="{{ $feature }}" selected>{{ $feature }}</option>
-                                        @endforeach
-                                    </select>
-                                    <p class="text-muted small">Additional features belonging to the egg. Useful for configuring additional panel modifications.</p>
+                            <div class="space-y-4">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold uppercase tracking-wide text-xs">Configuration
+                                            Files</span>
+                                    </label>
+                                    <textarea data-action="handle-tabs" name="config_files"
+                                        class="textarea textarea-bordered w-full h-48 focus:textarea-primary transition-all font-mono text-sm">{{ !is_null($egg->config_files) ? json_encode(json_decode($egg->config_files), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/50">JSON representation of
+                                            configuration files to modify.</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold uppercase tracking-wide text-xs">Start
+                                            Configuration</span>
+                                    </label>
+                                    <textarea data-action="handle-tabs" name="config_startup"
+                                        class="textarea textarea-bordered w-full h-48 focus:textarea-primary transition-all font-mono text-sm">{{ !is_null($egg->config_startup) ? json_encode(json_decode($egg->config_startup), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/50">JSON representation of boot
+                                            detection values.</span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Process Management</h3>
-                </div>
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <div class="alert alert-warning">
-                                <p>The following configuration options should not be edited unless you understand how this system works. If wrongly modified it is possible for the daemon to break.</p>
-                                <p>All fields are required unless you select a separate option from the 'Copy Settings From' dropdown, in which case fields may be left blank to use the values from that Egg.</p>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="pConfigFrom" class="form-label">Copy Settings From</label>
-                                <select name="config_from" id="pConfigFrom" class="form-control">
-                                    <option value="">None</option>
-                                    @foreach($egg->nest->eggs as $o)
-                                        <option value="{{ $o->id }}" {{ ($egg->config_from !== $o->id) ?: 'selected' }}>{{ $o->name }} &lt;{{ $o->author }}&gt;</option>
-                                    @endforeach
-                                </select>
-                                <p class="text-muted small">If you would like to default to settings from another Egg select it from the menu above.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pConfigStop" class="form-label">Stop Command</label>
-                                <input type="text" id="pConfigStop" name="config_stop" class="form-control" value="{{ $egg->config_stop }}" />
-                                <p class="text-muted small">The command that should be sent to server processes to stop them gracefully. If you need to send a <code>SIGINT</code> you should enter <code>^C</code> here.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pConfigLogs" class="form-label">Log Configuration</label>
-                                <textarea data-action="handle-tabs" id="pConfigLogs" name="config_logs" class="form-control" rows="6">{{ ! is_null($egg->config_logs) ? json_encode(json_decode($egg->config_logs), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
-                                <p class="text-muted small">This should be a JSON representation of where log files are stored, and whether or not the daemon should be creating custom logs.</p>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label for="pConfigFiles" class="form-label">Configuration Files</label>
-                                <textarea data-action="handle-tabs" id="pConfigFiles" name="config_files" class="form-control" rows="6">{{ ! is_null($egg->config_files) ? json_encode(json_decode($egg->config_files), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
-                                <p class="text-muted small">This should be a JSON representation of configuration files to modify and what parts should be changed.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="pConfigStartup" class="form-label">Start Configuration</label>
-                                <textarea data-action="handle-tabs" id="pConfigStartup" name="config_startup" class="form-control" rows="6">{{ ! is_null($egg->config_startup) ? json_encode(json_decode($egg->config_startup), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
-                                <p class="text-muted small">This should be a JSON representation of what values the daemon should be looking for when booting a server to determine completion.</p>
+
+                        <div class="card-actions justify-between mt-8 pt-6 border-t border-base-300">
+                            <button id="deleteButton" type="submit" name="_method" value="DELETE"
+                                class="btn btn-ghost btn-error btn-sm font-bold uppercase tracking-wider">
+                                <i class="ri-delete-bin-line mr-2"></i>
+                                <span>Delete</span>
+                            </button>
+                            <div class="flex gap-3">
+                                <a href="{{ route('admin.nests.egg.export', $egg->id) }}"
+                                    class="btn btn-info btn-sm font-bold uppercase tracking-wider">
+                                    <i class="ri-download-cloud-line mr-2"></i>
+                                    Export
+                                </a>
+                                {!! csrf_field() !!}
+                                <button type="submit" name="_method" value="PATCH"
+                                    class="btn btn-primary btn-sm px-8 font-bold uppercase tracking-wider">
+                                    <i class="ri-save-line mr-2"></i>
+                                    Save Configuration
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="box-footer">
-                    {!! csrf_field() !!}
-                    <button type="submit" name="_method" value="PATCH" class="btn btn-primary btn-sm pull-right">Save</button>
-                    <a href="{{ route('admin.nests.egg.export', $egg->id) }}" class="btn btn-sm btn-info pull-right" style="margin-right:10px;">Export</a>
-                    <button id="deleteButton" type="submit" name="_method" value="DELETE" class="btn btn-danger btn-sm muted muted-hover">
-                        <i class="fa fa-trash-o"></i>
-                    </button>
-                </div>
             </div>
-        </div>
+        </form>
     </div>
-</form>
+
+    <style>
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            @apply bg-base-100 border-base-300 rounded-lg h-12 flex items-center transition-all;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            @apply border-primary ring-1 ring-primary;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            @apply bg-primary text-primary-content border-none rounded-md px-2 py-0.5 text-xs font-bold uppercase tracking-wide;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            @apply text-primary-content mr-1 hover:text-white;
+        }
+
+        .select2-dropdown {
+            @apply bg-base-100 border-base-300 rounded-lg shadow-2xl;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            @apply bg-primary text-primary-content;
+        }
+    </style>
 @endsection
 
 @section('footer-scripts')
     @parent
     <script>
-    $('#pConfigFrom').select2();
-    $('#deleteButton').on('mouseenter', function (event) {
-        $(this).find('i').html(' Delete Egg');
-    }).on('mouseleave', function (event) {
-        $(this).find('i').html('');
-    });
-    $('textarea[data-action="handle-tabs"]').on('keydown', function(event) {
-        if (event.keyCode === 9) {
-            event.preventDefault();
+        $('.select2-config').select2();
+        $('.select2-features').select2({
+            tags: true,
+            selectOnClose: false,
+            tokenSeparators: [',', ' '],
+        });
 
-            var curPos = $(this)[0].selectionStart;
-            var prepend = $(this).val().substr(0, curPos);
-            var append = $(this).val().substr(curPos);
+        $('#deleteButton').on('mouseenter', function(event) {
+            $(this).find('span').text('Delete Egg');
+        }).on('mouseleave', function(event) {
+            $(this).find('span').text('Delete');
+        });
 
-            $(this).val(prepend + '    ' + append);
-        }
-    });
-    $('#pConfigFeatures').select2({
-        tags: true,
-        selectOnClose: false,
-        tokenSeparators: [',', ' '],
-    });
+        $('textarea[data-action="handle-tabs"]').on('keydown', function(event) {
+            if (event.keyCode === 9) {
+                event.preventDefault();
+
+                var curPos = $(this)[0].selectionStart;
+                var prepend = $(this).val().substr(0, curPos);
+                var append = $(this).val().substr(curPos);
+
+                $(this).val(prepend + '    ' + append);
+            }
+        });
     </script>
 @endsection

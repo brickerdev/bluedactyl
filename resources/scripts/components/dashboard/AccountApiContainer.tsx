@@ -1,20 +1,28 @@
 import { Eye, EyeSlash, Key, Plus, TrashBin } from '@gravity-ui/icons';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { format } from 'date-fns';
 import { Actions, useStoreActions } from 'easy-peasy';
-import { Field, Form, Formik, FormikHelpers } from 'formik';
 import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { object, string } from 'yup';
 
 import FlashMessageRender from '@/components/FlashMessageRender';
 import ApiKeyModal from '@/components/dashboard/ApiKeyModal';
-import ActionButton from '@/components/elements/ActionButton';
-import Code from '@/components/elements/Code';
-import FormikFieldWrapper from '@/components/elements/FormikFieldWrapper';
-import Input from '@/components/elements/Input';
-import { MainPageHeader } from '@/components/elements/MainPageHeader';
-import PageContentBlock from '@/components/elements/PageContentBlock';
 import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
-import { Dialog } from '@/components/elements/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import createApiKey from '@/api/account/createApiKey';
 import deleteApiKey from '@/api/account/deleteApiKey';
@@ -28,6 +36,59 @@ import { useFlashKey } from '@/plugins/useFlash';
 interface CreateValues {
     description: string;
     allowedIps: string;
+}
+
+function CreateApiForm({
+    onSubmit,
+}: {
+    onSubmit: (values: CreateValues, helpers: { setSubmitting: (v: boolean) => void; resetForm: () => void }) => void;
+}) {
+    const schema = object().shape({
+        description: string().required().min(4),
+        allowedIps: string(),
+    });
+
+    const { control, handleSubmit, formState, reset } = useForm<CreateValues>({
+        resolver: yupResolver(schema as any),
+        defaultValues: { description: '', allowedIps: '' },
+    });
+
+    const submitting = formState.isSubmitting;
+
+    return (
+        <form
+            id='create-api-form'
+            className='space-y-4'
+            onSubmit={handleSubmit((values) => onSubmit(values, { setSubmitting: () => {}, resetForm: () => reset() }))}
+        >
+            <SpinnerOverlay visible={submitting} />
+
+            <div className='space-y-2'>
+                <Label htmlFor='description'>Description</Label>
+                <Controller
+                    control={control}
+                    name='description'
+                    render={({ field }) => <Input {...field} id='description' className='w-full' />}
+                />
+                <p className='text-xs text-muted-foreground'>A description of this API key.</p>
+            </div>
+
+            <div className='space-y-2'>
+                <Label htmlFor='allowedIps'>Allowed IPs</Label>
+                <Controller
+                    control={control}
+                    name='allowedIps'
+                    render={({ field }) => <Input {...field} id='allowedIps' className='w-full' />}
+                />
+                <p className='text-xs text-muted-foreground'>
+                    Leave blank to allow any IP address to use this API key, otherwise provide each IP address on a new
+                    line. Note: You can also use CIDR ranges here.
+                </p>
+            </div>
+
+            <button type='submit' className='hidden' />
+        </form>
+    );
 }
 
 const AccountApiContainer = () => {
@@ -60,12 +121,15 @@ const AccountApiContainer = () => {
             });
     };
 
-    const submitCreate = (values: CreateValues, { setSubmitting, resetForm }: FormikHelpers<CreateValues>) => {
+    const submitCreate = (
+        values: CreateValues,
+        helpers: { setSubmitting: (v: boolean) => void; resetForm: () => void },
+    ) => {
         clearFlashes('account:api-keys');
         createApiKey(values.description, values.allowedIps)
             .then(({ secretToken, ...key }) => {
-                resetForm();
-                setSubmitting(false);
+                helpers.resetForm();
+                helpers.setSubmitting(false);
                 setApiKey(`${key.identifier}${secretToken}`);
                 setKeys((s) => [...s!, key]);
                 setShowCreateModal(false);
@@ -73,7 +137,7 @@ const AccountApiContainer = () => {
             .catch((error) => {
                 console.error(error);
                 addError({ key: 'account:api-keys', message: httpErrorToHuman(error) });
-                setSubmitting(false);
+                helpers.setSubmitting(false);
             });
     };
 
@@ -85,187 +149,164 @@ const AccountApiContainer = () => {
     };
 
     return (
-        <PageContentBlock title={'API Keys'}>
+        <div className='container mx-auto p-6'>
             <FlashMessageRender byKey='account:api-keys' />
-            <ApiKeyModal visible={apiKey.length > 0} onModalDismissed={() => setApiKey('')} apiKey={apiKey} />
+            <ApiKeyModal visible={apiKey.length > 0} onDismissed={() => setApiKey('')} apiKey={apiKey} />
 
             {/* Create API Key Modal */}
-            {showCreateModal && (
-                <Dialog.Confirm
-                    open={showCreateModal}
-                    onClose={() => setShowCreateModal(false)}
-                    title='Create API Key'
-                    confirm='Create Key'
-                    onConfirmed={() => {
-                        const form = document.getElementById('create-api-form') as HTMLFormElement;
-                        if (form) {
-                            const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-                            if (submitButton) submitButton.click();
-                        }
-                    }}
-                >
-                    <Formik
-                        onSubmit={submitCreate}
-                        initialValues={{ description: '', allowedIps: '' }}
-                        validationSchema={object().shape({
-                            allowedIps: string(),
-                            description: string().required().min(4),
-                        })}
-                    >
-                        {({ isSubmitting }) => (
-                            <Form id='create-api-form' className='space-y-4'>
-                                <SpinnerOverlay visible={isSubmitting} />
+            <AlertDialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Create API Key</AlertDialogTitle>
+                    </AlertDialogHeader>
 
-                                <FormikFieldWrapper
-                                    label='Description'
-                                    name='description'
-                                    description='A description of this API key.'
-                                >
-                                    <Field name='description' as={Input} className='w-full' />
-                                </FormikFieldWrapper>
+                    <CreateApiForm onSubmit={submitCreate} />
 
-                                <FormikFieldWrapper
-                                    label='Allowed IPs'
-                                    name='allowedIps'
-                                    description='Leave blank to allow any IP address to use this API key, otherwise provide each IP address on a new line. Note: You can also use CIDR ranges here.'
-                                >
-                                    <Field name='allowedIps' as={Input} className='w-full' />
-                                </FormikFieldWrapper>
-
-                                <button type='submit' className='hidden' />
-                            </Form>
-                        )}
-                    </Formik>
-                </Dialog.Confirm>
-            )}
-
-            <div className='w-full h-full min-h-full flex-1 flex flex-col px-2 sm:px-0'>
-                <div
-                    className='transform-gpu skeleton-anim-2 mb-3 sm:mb-4'
-                    style={{
-                        animationDelay: '50ms',
-                        animationTimingFunction:
-                            'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                    }}
-                >
-                    <MainPageHeader
-                        title='API Keys'
-                        titleChildren={
-                            <ActionButton
-                                variant='primary'
-                                onClick={() => setShowCreateModal(true)}
-                                className='flex items-center gap-2'
-                            >
-                                <Plus width={22} height={22} fill='currentColor' />
-                                Create API Key
-                            </ActionButton>
-                        }
-                    />
-                </div>
-
-                <div
-                    className='transform-gpu skeleton-anim-2'
-                    style={{
-                        animationDelay: '75ms',
-                        animationTimingFunction:
-                            'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                    }}
-                >
-                    <div className='bg-gradient-to-b from-[#ffffff08] to-[#ffffff05] border-[1px] border-[#ffffff12] rounded-xl p-4 sm:p-6 shadow-sm'>
-                        <SpinnerOverlay visible={loading} />
-                        <Dialog.Confirm
-                            title={'Delete API Key'}
-                            confirm={'Delete Key'}
-                            open={!!deleteIdentifier}
-                            onClose={() => setDeleteIdentifier('')}
-                            onConfirmed={() => doDeletion(deleteIdentifier)}
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const form = document.getElementById('create-api-form') as HTMLFormElement;
+                                if (form) {
+                                    const submitButton = form.querySelector(
+                                        'button[type="submit"]',
+                                    ) as HTMLButtonElement;
+                                    if (submitButton) submitButton.click();
+                                }
+                            }}
                         >
-                            All requests using the <Code>{deleteIdentifier}</Code> key will be invalidated.
-                        </Dialog.Confirm>
+                            Create Key
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-                        {keys.length === 0 ? (
-                            <div className='text-center py-12'>
-                                <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-[#ffffff11] flex items-center justify-center'>
-                                    <Key width={22} height={22} className='text-zinc-400' fill='currentColor' />
+            <div className='flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4'>
+                <div>
+                    <h1 className='text-3xl font-bold tracking-tight'>API Keys</h1>
+                    <p className='text-muted-foreground'>Manage your account API keys.</p>
+                </div>
+                <Button variant='default' onClick={() => setShowCreateModal(true)} className='flex items-center gap-2'>
+                    <Plus width={20} height={20} fill='currentColor' />
+                    Create API Key
+                </Button>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className='text-lg'>Active API Keys</CardTitle>
+                    <CardDescription>A list of all API keys associated with your account.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {loading && keys.length === 0 ? (
+                        <div className='py-8 text-center text-muted-foreground'>Loading your API keys...</div>
+                    ) : (
+                        <>
+                            <AlertDialog
+                                open={!!deleteIdentifier}
+                                onOpenChange={(open) => !open && setDeleteIdentifier('')}
+                            >
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            All requests using the{' '}
+                                            <code className='font-mono px-2 py-1 bg-muted/20 rounded'>
+                                                {deleteIdentifier}
+                                            </code>{' '}
+                                            key will be invalidated.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => doDeletion(deleteIdentifier)}>
+                                            Delete Key
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+                            {keys.length === 0 ? (
+                                <div className='text-center py-12 border rounded-lg'>
+                                    <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center'>
+                                        <Key
+                                            width={22}
+                                            height={22}
+                                            className='text-muted-foreground'
+                                            fill='currentColor'
+                                        />
+                                    </div>
+                                    <h3 className='text-lg font-semibold mb-2'>No API Keys</h3>
+                                    <p className='text-sm text-muted-foreground max-w-sm mx-auto'>
+                                        You haven't created any API keys yet. Create one to get started with the API.
+                                    </p>
                                 </div>
-                                <h3 className='text-lg font-medium text-zinc-200 mb-2'>No API Keys</h3>
-                                <p className='text-sm text-zinc-400 max-w-sm mx-auto'>
-                                    {loading
-                                        ? 'Loading your API keys...'
-                                        : "You haven't created any API keys yet. Create one to get started with the API."}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className='space-y-3'>
-                                {keys.map((key, index) => (
-                                    <div
-                                        key={key.identifier}
-                                        className='transform-gpu skeleton-anim-2'
-                                        style={{
-                                            animationDelay: `${index * 25 + 100}ms`,
-                                            animationTimingFunction:
-                                                'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                                        }}
-                                    >
-                                        <div className='bg-[#ffffff05] border-[1px] border-[#ffffff08] rounded-lg p-4 hover:border-[#ffffff15] transition-all duration-150'>
+                            ) : (
+                                <div className='space-y-3'>
+                                    {keys.map((key) => (
+                                        <div
+                                            key={key.identifier}
+                                            className='bg-popover border border-border rounded-lg p-4 hover:border-accent transition-all duration-150'
+                                        >
                                             <div className='flex items-center justify-between'>
                                                 <div className='flex-1 min-w-0'>
                                                     <div className='flex items-center gap-3 mb-2'>
-                                                        <h4 className='text-sm font-medium text-zinc-100 truncate'>
+                                                        <h4 className='text-sm font-medium truncate'>
                                                             {key.description}
                                                         </h4>
                                                     </div>
-                                                    <div className='flex items-center gap-4 text-xs text-zinc-400'>
+                                                    <div className='flex flex-wrap items-center gap-4 text-xs text-muted-foreground'>
                                                         <span>
                                                             Last used:{' '}
                                                             {key.lastUsedAt
-                                                                ? format(key.lastUsedAt, 'MMM d, yyyy HH:mm')
+                                                                ? format(new Date(key.lastUsedAt), 'MMM d, yyyy HH:mm')
                                                                 : 'Never'}
                                                         </span>
                                                         <div className='flex items-center gap-2'>
                                                             <span>Key:</span>
-                                                            <code className='font-mono px-2 py-1 bg-[#ffffff08] border border-[#ffffff08] rounded text-zinc-300'>
+                                                            <code className='font-mono px-2 py-1 bg-muted/20 border border-border rounded'>
                                                                 {showKeys[key.identifier]
                                                                     ? key.identifier
                                                                     : '••••••••••••••••'}
                                                             </code>
-                                                            <ActionButton
-                                                                variant='secondary'
-                                                                size='sm'
+                                                            <Button
+                                                                variant='ghost'
+                                                                size='icon'
                                                                 onClick={() => toggleKeyVisibility(key.identifier)}
-                                                                className='p-1 text-zinc-400 hover:text-zinc-300'
+                                                                className='h-7 w-7'
                                                             >
                                                                 {showKeys[key.identifier] ? (
                                                                     <EyeSlash
-                                                                        width={18}
-                                                                        height={18}
+                                                                        width={16}
+                                                                        height={16}
                                                                         fill='currentColor'
                                                                     />
                                                                 ) : (
-                                                                    <Eye width={18} height={18} fill='currentColor' />
+                                                                    <Eye width={16} height={16} fill='currentColor' />
                                                                 )}
-                                                            </ActionButton>
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <ActionButton
-                                                    variant='danger'
-                                                    size='sm'
+                                                <Button
+                                                    variant='destructive'
+                                                    size='icon'
                                                     className='ml-4'
                                                     onClick={() => setDeleteIdentifier(key.identifier)}
                                                 >
-                                                    <TrashBin width={20} height={20} fill='currentColor' />
-                                                </ActionButton>
+                                                    <TrashBin width={18} height={18} fill='currentColor' />
+                                                </Button>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </PageContentBlock>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 

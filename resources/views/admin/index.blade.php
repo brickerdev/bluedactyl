@@ -1,157 +1,187 @@
 @extends('layouts.admin')
 
 @section('title')
-  Administration
+    Administration
 @endsection
 
 @section('content-header')
-  <h1>Administrative Overview<small>A quick glance at your system.</small></h1>
-  <ol class="breadcrumb">
-    <li><a href="{{ route('admin.index') }}">Admin</a></li>
-    <li class="active">Index</li>
-  </ol>
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-4xl font-black tracking-tight">Administrative Overview</h1>
+            <p class="text-base-content/60 text-lg">A quick glance at your system status.</p>
+        </div>
+        <div class="breadcrumbs text-sm bg-base-200 px-4 py-2 rounded-lg border border-base-300">
+            <ul>
+                <li><a href="{{ route('admin.index') }}" class="opacity-60">Admin</a></li>
+                <li class="font-bold">Index</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-  <div class="row">
-    <div class="col-xs-12">
-    <div class="box
-      ">
-      <div class="box-header with-border">
-      <h3 class="box-title">System Information</h3>
-      </div>
-      <div class="box-body">
-      You are running Bluedactyl panel version <code>{{ config('app.version') }}</code>.
-      </div>
+    <div class="grid grid-cols-1 gap-8">
+        <!-- Hero Section -->
+        <div class="hero bg-base-200 rounded-3xl border border-base-300 overflow-hidden shadow-xl">
+            <div class="hero-content flex-col lg:flex-row p-8 lg:p-12 gap-8">
+                <div class="bg-primary/10 p-6 rounded-2xl border border-primary/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="text-center lg:text-left">
+                    <h2 class="text-3xl font-black mb-2">Welcome to Bluedactyl</h2>
+                    <p class="text-base-content/70 text-lg mb-4">You are running version <code class="badge badge-primary font-mono py-3 px-4">{{ config('app.version') }}</code>. Your system is healthy and all services are operational.</p>
+                    <div class="flex flex-wrap gap-2 justify-center lg:justify-start">
+                        <div class="badge badge-outline badge-lg opacity-50">Laravel {{ App::version() }}</div>
+                        <div class="badge badge-outline badge-lg opacity-50">PHP {{ phpversion() }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      <!-- <div aria-hidden="true"
-      style="background-color: #ffffff33; position: absolute; height: 1px; width: 100%; margin-top: 20px;"></div>
-      <div class="row" style="margin-top: 20px;">
-      <div class="col-md-3 col-sm-6 col-xs-12">
-      <div class="small-box bg-[#000000]">
-      <div class="inner">
-      <h3 id="cpu-load">--</h3>
-      <p>CPU Usage</p>
-      </div>
-      </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-      <div class="small-box bg-[#000000]">
-      <div class="inner">
-      <h3 id="ram-usage">--</h3>
-      <p>Memory Usage</p>
-      </div>
-      </div>
-      </div>
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+                <div class="card-body p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-cpu text-2xl"></i>
+                        </div>
+                        <div class="badge badge-ghost opacity-50">Real-time</div>
+                    </div>
+                    <div class="text-4xl font-black tracking-tighter mb-1" id="cpu-load">--</div>
+                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">CPU Usage</div>
+                    <progress class="progress progress-info w-full mt-4" value="0" max="100" id="cpu-progress"></progress>
+                </div>
+            </div>
 
-      <div class="col-sm-6 col-lg-3">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+                <div class="card-body p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-memory text-2xl"></i>
+                        </div>
+                        <div class="badge badge-ghost opacity-50">Memory</div>
+                    </div>
+                    <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="ram-usage">--</div>
+                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Memory Usage</div>
+                    <progress class="progress progress-secondary w-full mt-4" value="0" max="100" id="ram-progress"></progress>
+                </div>
+            </div>
 
-      <div class="small-box bg-[#000000]">
-      <div class="inner items-center">
-      <h3 id="disk-usage">--</h3>
-      <p>Storage</p>
-      </div>
-      </div>
-      </div>
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+                <div class="card-body p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-hdd-network text-2xl"></i>
+                        </div>
+                        <div class="badge badge-ghost opacity-50">Storage</div>
+                    </div>
+                    <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="disk-usage">--</div>
+                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Disk Space</div>
+                    <progress class="progress progress-success w-full mt-4" value="0" max="100" id="disk-progress"></progress>
+                </div>
+            </div>
 
-      <div class="col-sm-6 col-lg-3">
-      <div class="small-box bg-[#000000]">
-      <div class="inner">
-      <h3 id="uptime">--</h3>
-      <p>System Uptime</p>
-      </div>
-      </div>
-      </div> -->
-      <!-- </div> -->
-    </div>
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+                <div class="card-body p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-clock-history text-2xl"></i>
+                        </div>
+                        <div class="badge badge-ghost opacity-50">Uptime</div>
+                    </div>
+                    <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="uptime">--</div>
+                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">System Uptime</div>
+                    <div class="flex gap-1 mt-6">
+                        <div class="h-1 flex-1 bg-orange-500 rounded-full"></div>
+                        <div class="h-1 flex-1 bg-orange-500 rounded-full"></div>
+                        <div class="h-1 flex-1 bg-orange-500 rounded-full opacity-30"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Quick Links -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="https://discord.gg/UhuYKKK2uM" target="_blank" class="btn btn-lg bg-[#5865F2] hover:bg-[#4752C4] text-white border-none shadow-lg group">
+                <i class="fa fa-fw fa-support group-hover:rotate-12 transition-transform"></i> Discord Support
+            </a>
+            <a href="https://bluedactyl.dev" target="_blank" class="btn btn-lg btn-primary shadow-lg group">
+                <i class="fa fa-fw fa-book group-hover:scale-110 transition-transform"></i> Documentation
+            </a>
+            <a href="https://github.com/pyrohost/bluedactyl" target="_blank" class="btn btn-lg btn-neutral shadow-lg group">
+                <i class="fa fa-fw fa-github group-hover:rotate-12 transition-transform"></i> GitHub Repository
+            </a>
+            <a href="{{ $version->getDonations() }}" target="_blank" class="btn btn-lg btn-success shadow-lg group">
+                <i class="fa fa-fw fa-heart group-hover:scale-125 transition-transform text-red-400"></i> Support Project
+            </a>
+        </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-6 col-sm-3 text-center">
-    <a href="https://discord.gg/UhuYKKK2uM"><button class="btn btn-warning" style="width:100%;"><i
-        class="fa fa-fw fa-support"></i> Get Help <small>(via Discord)</small></button></a>
-    </div>
-    <div class="col-xs-6 col-sm-3 text-center">
-    <a href="https://bluedactyl.dev"><button class="btn btn-primary" style="width:100%;"><i
-        class="fa fa-fw fa-link"></i> Documentation</button></a>
-    </div>
-    <div class="clearfix visible-xs-block">&nbsp;</div>
-    <div class="col-xs-6 col-sm-3 text-center">
-    <a href="https://github.com/pyrohost/bluedactyl"><button class="btn btn-primary" style="width:100%;"><i
-        class="fa fa-fw fa-support"></i> Github</button></a>
-    </div>
-    <div class="col-xs-6 col-sm-3 text-center">
-    <a href="{{ $version->getDonations() }}"><button class="btn btn-success" style="width:100%;"><i
-        class="fa fa-fw fa-money"></i> Support the Project</button></a>
-    </div>
-  </div>
 @endsection
 
 @section('footer-scripts')
-  @parent
-  <script>
-    $(document).ready(function () {
-    function formatBytes(bytes, decimals = 2) {
-      if (!bytes) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
-    }
+    @parent
+    <script>
+        $(document).ready(function() {
+            function formatBytes(bytes, decimals = 2) {
+                if (!bytes) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+            }
 
-    function formatUptime(seconds) {
-      const days = Math.floor(seconds / 86400);
-      const hours = Math.floor((seconds % 86400) / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      return `${days}d ${hours}h ${minutes}m`;
-    }
+            function formatUptime(seconds) {
+                const days = Math.floor(seconds / 86400);
+                const hours = Math.floor((seconds % 86400) / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                return `${days}d ${hours}h ${minutes}m`;
+            }
 
-    function updateSystemMetrics() {
-      $.ajax({
-      url: '/api/application/panel/status',
-      method: 'GET',
-      success: function (data) {
-        $('#cpu-load').text(`${data.metrics.cpu.toFixed(1)}%`);
-        $('#ram-usage').html(
-        `${formatBytes(data.metrics.memory.used)} Used <br><small>of ${formatBytes(data.metrics.memory.total)}</small>`
-        );
-        $('#disk-usage').html(
-        `${formatBytes(data.metrics.disk.used)} Used <br><small>of ${formatBytes(data.metrics.disk.total)}</small>`
-        );
-        $('#uptime').text(formatUptime(data.metrics.uptime));
-      },
-      error: function (xhr) {
-        console.error('Failed to fetch system metrics:', xhr.responseText);
-      }
-      });
-    }
+            function updateSystemMetrics() {
+                $.ajax({
+                    url: '/api/application/panel/status',
+                    method: 'GET',
+                    success: function(data) {
+                        // CPU
+                        const cpu = data.metrics.cpu;
+                        $('#cpu-load').text(`${cpu.toFixed(1)}%`);
+                        $('#cpu-progress').val(cpu);
 
-    // Initial update
-    // updateSystemMetrics();
+                        // RAM
+                        const ramUsed = data.metrics.memory.used;
+                        const ramTotal = data.metrics.memory.total;
+                        const ramPercent = (ramUsed / ramTotal) * 100;
+                        $('#ram-usage').html(
+                            `${formatBytes(ramUsed)} <span class="text-xs opacity-40 font-normal block mt-1">of ${formatBytes(ramTotal)}</span>`
+                        );
+                        $('#ram-progress').val(ramPercent);
 
-    // Update every 60 seconds
-    // setInterval(updateSystemMetrics, 60000);
-    });
-  </script>
+                        // Disk
+                        const diskUsed = data.metrics.disk.used;
+                        const diskTotal = data.metrics.disk.total;
+                        const diskPercent = (diskUsed / diskTotal) * 100;
+                        $('#disk-usage').html(
+                            `${formatBytes(diskUsed)} <span class="text-xs opacity-40 font-normal block mt-1">of ${formatBytes(diskTotal)}</span>`
+                        );
+                        $('#disk-progress').val(diskPercent);
 
-  <style>
-    .small-box {
-    transition: transform 0.2s ease;
-    }
+                        // Uptime
+                        $('#uptime').text(formatUptime(data.metrics.uptime));
+                    },
+                    error: function(xhr) {
+                        console.error('Failed to fetch system metrics:', xhr.responseText);
+                    }
+                });
+            }
 
-    .small-box:hover {
-    transform: translateY(-3px);
-    }
+            // Initial update
+            updateSystemMetrics();
 
-    .small-box .icon {
-    font-size: 70px;
-    opacity: 0.2;
-    }
-
-    .small-box h3 small {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    }
-  </style>
+            // Update every 30 seconds for a more "real-time" feel
+            setInterval(updateSystemMetrics, 30000);
+        });
+    </script>
 @endsection

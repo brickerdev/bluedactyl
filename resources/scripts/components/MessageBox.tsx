@@ -1,28 +1,29 @@
-import styled from 'styled-components';
+import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
+import React from 'react';
 
-import Code from './elements/Code';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-export type FlashMessageType = 'success' | 'info' | 'warning' | 'error';
-
-interface Props {
+interface MessageBoxProps {
     title?: string;
-    children: string;
-    type?: FlashMessageType;
+    type?: 'error' | 'info' | 'success' | 'warning';
+    children?: React.ReactNode;
 }
 
-const Container = styled.div<{ $type?: FlashMessageType }>``;
-Container.displayName = 'MessageBox.Container';
+const MessageBox: React.FC<MessageBoxProps> = ({ title, type = 'info', children }) => {
+    const Icon = {
+        error: AlertCircle,
+        warning: TriangleAlert,
+        success: CheckCircle2,
+        info: Info,
+    }[type];
 
-const MessageBox = ({ title, children, type }: Props) => (
-    <Container
-        className='flex flex-col gap-2 bg-black border-[2px] border-brand/70 p-4 rounded-2xl mb-4'
-        $type={type}
-        role={'alert'}
-    >
-        {title && <h2 className='font-bold text-xl'>{title}</h2>}
-        <Code>{children}</Code>
-    </Container>
-);
-MessageBox.displayName = 'MessageBox';
+    return (
+        <Alert variant={type === 'error' ? 'destructive' : 'default'}>
+            <Icon className='h-4 w-4' />
+            {title && <AlertTitle>{title}</AlertTitle>}
+            <AlertDescription>{children}</AlertDescription>
+        </Alert>
+    );
+};
 
 export default MessageBox;

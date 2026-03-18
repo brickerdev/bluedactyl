@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
-import styled, { css, keyframes } from 'styled-components';
 
 import ErrorBoundary from '@/components/elements/ErrorBoundary';
+import { Spinner as UISpinner } from '@/components/ui/spinner';
+
+import { cn } from '@/lib/utils';
 
 export type SpinnerSize = 'small' | 'base' | 'large';
 
@@ -11,54 +13,33 @@ interface Props {
     centered?: boolean;
     isBlue?: boolean;
     children?: React.ReactNode;
+    className?: string;
 }
 
 interface Spinner extends React.FC<Props> {
     Size: Record<'SMALL' | 'BASE' | 'LARGE', SpinnerSize>;
-    Suspense: React.FC<{ children: React.ReactNode }>; // ✅ Correct
+    Suspense: React.FC<{ children: React.ReactNode }>;
 }
 
-const spin = keyframes`
-    to { transform: rotate(360deg); }
-`;
+const Spinner: Spinner = ({ centered, visible = true, size = 'base', isBlue, className, ...props }) => {
+    if (!visible) return null;
 
-const SpinnerComponent = styled.div<Props>`
-    width: 32px;
-    height: 32px;
-    border-width: 3px;
-    border-radius: 50%;
-    animation: ${spin} 1s cubic-bezier(0.55, 0.25, 0.25, 0.7) infinite;
-    aspect-ratio: 1 / 1;
+    const sizeClasses = {
+        small: 'size-4',
+        base: 'size-8',
+        large: 'size-16',
+    };
 
-    ${(props) =>
-        props.size === 'small'
-            ? `width: 16px; height: 16px; border-width: 2px;`
-            : props.size === 'large'
-              ? css`
-                    width: 64px;
-                    height: 64px;
-                    border-width: 6px;
-                `
-              : null};
+    const spinner = (
+        <UISpinner className={cn(sizeClasses[size], isBlue ? 'text-blue-500' : 'text-primary', className)} {...props} />
+    );
 
-    border-color: ${(props) => (!props.isBlue ? 'rgba(255, 255, 255, 0.2)' : 'hsla(212, 92%, 43%, 0.2)')};
-    border-top-color: ${(props) => (!props.isBlue ? 'rgb(255, 255, 255)' : 'hsl(212, 92%, 43%)')};
-`;
+    if (centered) {
+        return <div className='flex justify-center items-center w-full sm:absolute sm:inset-0 sm:z-50'>{spinner}</div>;
+    }
 
-const Spinner: Spinner = ({ centered, visible = true, ...props }) =>
-    visible &&
-    (centered ? (
-        <div
-            className={`
-              flex justify-center items-center w-full
-              sm:absolute sm:inset-0 sm:z-50
-          `}
-        >
-            <SpinnerComponent {...props} />
-        </div>
-    ) : (
-        <SpinnerComponent {...props} />
-    ));
+    return spinner;
+};
 
 Spinner.displayName = 'Spinner';
 

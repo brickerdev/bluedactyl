@@ -1,57 +1,53 @@
-import ModalContext from '@/context/ModalContext';
-import { useContext } from 'react';
-
 import FlashMessageRender from '@/components/FlashMessageRender';
 import CopyOnClick from '@/components/elements/CopyOnClick';
-
-import asModal from '@/hoc/asModal';
-
-import ActionButton from '../elements/ActionButton';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Props {
+    visible: boolean;
+    onDismissed: () => void;
     apiKey: string;
 }
 
-const ApiKeyModal = ({ apiKey }: Props) => {
-    const { dismiss } = useContext(ModalContext);
-
+const ApiKeyModal = ({ visible, onDismissed, apiKey }: Props) => {
     return (
-        <div className='p-6 space-y-6 max-w-lg mx-auto rounded-lg shadow-lg'>
-            {/* Flash message section */}
-            <FlashMessageRender byKey='account' />
+        <Dialog open={visible} onOpenChange={(open) => !open && onDismissed()}>
+            <DialogContent className='sm:max-w-150'>
+                <DialogHeader>
+                    <DialogTitle className='text-2xl font-bold'>Your API Key</DialogTitle>
+                    <DialogDescription>
+                        The API key you have requested is shown below. Please store it in a safe place, as it will not
+                        be shown again.
+                    </DialogDescription>
+                </DialogHeader>
 
-            {/* Modal Header */}
-            <p className='text-sm text-white-600 mt-2'>
-                The API key you have requested is shown below. Please store it in a safe place, as it will not be shown
-                again.
-            </p>
+                <div className='py-4'>
+                    <FlashMessageRender byKey='account' />
 
-            {/* API Key Display Section */}
-            <div className='relative mt-6'>
-                <pre className='bg-gray-900 text-white p-4 rounded-lg font-mono overflow-x-auto'>
-                    <CopyOnClick text={apiKey}>
-                        <code className='text-sm break-words'>{apiKey}</code>
-                    </CopyOnClick>
+                    <div className='relative mt-2'>
+                        <div className='bg-muted p-4 rounded-lg font-mono overflow-x-auto border border-border'>
+                            <CopyOnClick text={apiKey}>
+                                <code className='text-sm break-words text-foreground'>{apiKey}</code>
+                            </CopyOnClick>
+                        </div>
+                    </div>
+                </div>
 
-                    {/* Copy button with icon */}
-                    <div className='absolute top-2 right-2'></div>
-                </pre>
-            </div>
-
-            {/* Action Buttons */}
-            <div className='flex justify-end space-x-4'>
-                <ActionButton type='button' onClick={() => dismiss()} variant='danger' className='flex items-center'>
-                    Close
-                </ActionButton>
-            </div>
-        </div>
+                <DialogFooter>
+                    <Button type='button' onClick={() => onDismissed()} variant='outline'>
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 
-ApiKeyModal.displayName = 'ApiKeyModal';
-
-export default asModal<Props>({
-    title: 'Your API Key',
-    closeOnEscape: true, // Allows closing the modal by pressing Escape
-    closeOnBackground: true, // Allows closing by clicking outside the modal
-})(ApiKeyModal);
+export default ApiKeyModal;

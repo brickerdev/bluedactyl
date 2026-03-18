@@ -1,9 +1,9 @@
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 
 import ActionButton from '@/components/elements/ActionButton';
-import { ModalMask } from '@/components/elements/Modal';
-import FadeTransition from '@/components/elements/transitions/FadeTransition';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
 
@@ -97,15 +97,11 @@ const UploadButton = () => {
 
     return (
         <>
-            <FadeTransition show={visible} duration='duration-75' key='upload_modal_mask' appear unmount>
-                <ModalMask
-                    className='flex'
-                    onClick={() => setVisible(false)}
+            <Dialog open={visible} onOpenChange={setVisible}>
+                <DialogContent
+                    hideClose
+                    className='sm:max-w-[400px] p-0 overflow-hidden border-none bg-transparent shadow-none outline-none'
                     onDragOver={(e) => e.preventDefault()}
-                    // why doesn't vanilla pterodactyl have this?
-                    onDragLeave={() => {
-                        setVisible(false);
-                    }}
                     onDrop={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -116,10 +112,13 @@ const UploadButton = () => {
                         onFileSubmission(e.dataTransfer.files);
                     }}
                 >
-                    <div className={'w-full flex items-center justify-center pointer-events-none'}>
+                    <VisuallyHidden>
+                        <DialogTitle>Upload Files</DialogTitle>
+                    </VisuallyHidden>
+                    <div className={'w-full flex items-center justify-center'}>
                         <div
                             className={
-                                'relative flex flex-col items-center gap-4 bg-brand w-full rounded-2xl py-12 px-4 mx-10 max-w-sm'
+                                'relative flex flex-col items-center gap-4 bg-brand w-full rounded-2xl py-12 px-4 max-w-sm'
                             }
                         >
                             <div className='absolute inset-4 border-dashed border-[#ffffff88] border-2 rounded-xl'></div>
@@ -144,15 +143,15 @@ const UploadButton = () => {
                             </svg>
                             <h1
                                 className={
-                                    'flex-1 text-lg font-bold tracking-tight text-center truncate w-full relative px-4'
+                                    'flex-1 text-lg font-bold tracking-tight text-center truncate w-full relative px-4 text-white'
                                 }
                             >
                                 Upload to {name}
                             </h1>
                         </div>
                     </div>
-                </ModalMask>
-            </FadeTransition>
+                </DialogContent>
+            </Dialog>
             <input
                 type={'file'}
                 ref={fileUploadInput}

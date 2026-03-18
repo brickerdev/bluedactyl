@@ -5,100 +5,129 @@
 @endsection
 
 @section('content-header')
-    <h1>{{ $server->name }}<small>Control startup command as well as variables.</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.servers') }}">Servers</a></li>
-        <li><a href="{{ route('admin.servers.view', $server->id) }}">{{ $server->name }}</a></li>
-        <li class="active">Startup</li>
-    </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter">{{ $server->name }}</h1>
+            <p class="text-base-content/60 text-sm">Control startup command as well as variables.</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.servers') }}">Servers</a></li>
+                <li><a href="{{ route('admin.servers.view', $server->id) }}">{{ $server->name }}</a></li>
+                <li class="text-primary">Startup</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
 @include('admin.servers.partials.navigation')
+
 <form action="{{ route('admin.servers.view.startup', $server->id) }}" method="POST">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Startup Command Modification</h3>
+    <div class="grid grid-cols-1 gap-8 mb-8">
+        <!-- Startup Command Modification -->
+        <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+            <div class="card-body space-y-6">
+                <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Startup Command Modification</h3>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Startup Command</span>
+                    </label>
+                    <input id="pStartup" name="startup" class="input input-bordered focus:input-primary transition-all font-mono text-sm" type="text" value="{{ old('startup', $server->startup) }}" />
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/50">
+                            Available variables: <code>@{{SERVER_MEMORY}}</code>, <code>@{{SERVER_IP}}</code>, and <code>@{{SERVER_PORT}}</code>.
+                        </span>
+                    </label>
                 </div>
-                <div class="box-body">
-                    <label for="pStartup" class="form-label">Startup Command</label>
-                    <input id="pStartup" name="startup" class="form-control" type="text" value="{{ old('startup', $server->startup) }}" />
-                    <p class="small text-muted">Edit your server's startup command here. The following variables are available by default: <code>@{{SERVER_MEMORY}}</code>, <code>@{{SERVER_IP}}</code>, and <code>@{{SERVER_PORT}}</code>.</p>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Default Service Start Command</span>
+                    </label>
+                    <input id="pDefaultStartupCommand" class="input input-bordered bg-base-300/50 font-mono text-sm" type="text" readonly />
                 </div>
-                <div class="box-body">
-                    <label for="pDefaultStartupCommand" class="form-label">Default Service Start Command</label>
-                    <input id="pDefaultStartupCommand" class="form-control" type="text" readonly />
-                </div>
-                <div class="box-footer">
+
+                <div class="pt-4 flex justify-end border-t border-base-300">
                     {!! csrf_field() !!}
-                    <button type="submit" class="btn btn-primary btn-sm pull-right">Save Modifications</button>
+                    <button type="submit" class="btn btn-primary px-8">Save Modifications</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Service Configuration</h3>
-                </div>
-                <div class="box-body row">
-                    <div class="col-xs-12">
-                        <p class="small text-danger">
-                            Changing any of the below values will result in the server processing a re-install command. The server will be stopped and will then proceed.
-                            If you would like the service scripts to not run, ensure the box is checked at the bottom.
-                        </p>
-                        <p class="small text-danger">
-                            <strong>This is a destructive operation in many cases. This server will be stopped immediately in order for this action to proceed.</strong>
-                        </p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="space-y-8">
+            <!-- Service Configuration -->
+            <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+                <div class="card-body space-y-6">
+                    <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Service Configuration</h3>
+                    
+                    <div class="alert alert-error alert-soft shadow-inner">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <div class="text-xs font-medium">
+                            Changing these values will trigger a <strong>re-install</strong>. The server will be stopped immediately.
+                        </div>
                     </div>
-                    <div class="form-group col-xs-12">
-                        <label for="pNestId">Nest</label>
-                        <select name="nest_id" id="pNestId" class="form-control">
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Nest</span>
+                        </label>
+                        <select name="nest_id" id="pNestId" class="select select-bordered focus:select-primary">
                             @foreach($nests as $nest)
-                                <option value="{{ $nest->id }}"
-                                    @if($nest->id === $server->nest_id)
-                                        selected
-                                    @endif
-                                >{{ $nest->name }}</option>
+                                <option value="{{ $nest->id }}" @if($nest->id === $server->nest_id) selected @endif>{{ $nest->name }}</option>
                             @endforeach
                         </select>
-                        <p class="small text-muted no-margin">Select the Nest that this server will be grouped into.</p>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/50">Select the Nest for this server.</span>
+                        </label>
                     </div>
-                    <div class="form-group col-xs-12">
-                        <label for="pEggId">Egg</label>
-                        <select name="egg_id" id="pEggId" class="form-control"></select>
-                        <p class="small text-muted no-margin">Select the Egg that will provide processing data for this server.</p>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Egg</span>
+                        </label>
+                        <select name="egg_id" id="pEggId" class="select select-bordered focus:select-primary"></select>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/50">Select the Egg that provides processing data.</span>
+                        </label>
                     </div>
-                    <div class="form-group col-xs-12">
-                        <div class="checkbox checkbox-primary no-margin-bottom">
-                            <input id="pSkipScripting" name="skip_scripts" type="checkbox" value="1" @if($server->skip_scripts) checked @endif />
-                            <label for="pSkipScripting" class="strong">Skip Egg Install Script</label>
-                        </div>
-                        <p class="small text-muted no-margin">If the selected Egg has an install script attached to it, the script will run during install. If you would like to skip this step, check this box.</p>
+
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <input id="pSkipScripting" name="skip_scripts" type="checkbox" value="1" class="checkbox checkbox-primary" @if($server->skip_scripts) checked @endif />
+                            <span class="label-text font-bold">Skip Egg Install Script</span>
+                        </label>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/50">If checked, the install script attached to the Egg will not run.</span>
+                        </label>
                     </div>
                 </div>
             </div>
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Docker Image Configuration</h3>
-                </div>
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="pDockerImage">Image</label>
-                        <select id="pDockerImage" name="docker_image" class="form-control"></select>
-                        <input id="pDockerImageCustom" name="custom_docker_image" value="{{ old('custom_docker_image') }}" class="form-control" placeholder="Or enter a custom image..." style="margin-top:1rem"/>
-                        <p class="small text-muted no-margin">This is the Docker image that will be used to run this server. Select an image from the dropdown or enter a custom image in the text field above.</p>
+
+            <!-- Docker Image Configuration -->
+            <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300">
+                <div class="card-body space-y-6">
+                    <h3 class="text-xl font-bold tracking-tight border-b border-base-300 pb-4">Docker Image Configuration</h3>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Image</span>
+                        </label>
+                        <select id="pDockerImage" name="docker_image" class="select select-bordered focus:select-primary mb-4"></select>
+                        <input id="pDockerImageCustom" name="custom_docker_image" value="{{ old('custom_docker_image') }}" class="input input-bordered focus:input-primary transition-all" placeholder="Or enter a custom image..." />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/50">The Docker image used to run this server.</span>
+                        </label>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="row" id="appendVariablesTo"></div>
-        </div>
+
+        <!-- Variables -->
+        <div class="space-y-8" id="appendVariablesTo"></div>
     </div>
 </form>
 @endsection
@@ -106,6 +135,14 @@
 @section('footer-scripts')
     @parent
     {!! Theme::js('vendor/lodash/lodash.js') !!}
+    <style>
+        .select2-container--default .select2-selection--single {
+            @apply bg-base-100 border-base-300 rounded-lg h-12 flex items-center px-2;
+        }
+        .select2-dropdown {
+            @apply bg-base-200 border-base-300 shadow-2xl rounded-lg overflow-hidden;
+        }
+    </style>
     <script>
     function escapeHtml(str) {
         var div = document.createElement('div');
@@ -150,20 +187,20 @@
             $('#appendVariablesTo').html('');
             $.each(_.get(objectChain, 'variables', []), function (i, item) {
                 var setValue = _.get(Bluedactyl.server_variables, item.env_variable, item.default_value);
-                var isRequired = (item.required === 1) ? '<span class="label label-danger">Required</span> ' : '';
+                var isRequired = (item.required === 1) ? '<span class="badge badge-error badge-sm mr-2">Required</span> ' : '';
                 var dataAppend = ' \
-                    <div class="col-xs-12"> \
-                        <div class="box"> \
-                            <div class="box-header with-border"> \
-                                <h3 class="box-title">' + isRequired + escapeHtml(item.name) + '</h3> \
+                    <div class="card bg-base-200/50 shadow-xl backdrop-blur-md border border-base-300"> \
+                        <div class="card-body space-y-4"> \
+                            <h3 class="text-lg font-bold tracking-tight border-b border-base-300 pb-2 flex items-center">' + isRequired + escapeHtml(item.name) + '</h3> \
+                            <div class="form-control"> \
+                                <input name="environment[' + escapeHtml(item.env_variable) + ']" class="input input-bordered focus:input-primary transition-all" type="text" id="egg_variable_' + escapeHtml(item.env_variable) + '" /> \
+                                <p class="text-xs text-base-content/60 mt-2">' + escapeHtml(item.description) + '</p> \
                             </div> \
-                            <div class="box-body"> \
-                                <input name="environment[' + escapeHtml(item.env_variable) + ']" class="form-control" type="text" id="egg_variable_' + escapeHtml(item.env_variable) + '" /> \
-                                <p class="no-margin small text-muted">' + escapeHtml(item.description) + '</p> \
-                            </div> \
-                            <div class="box-footer"> \
-                                <p class="no-margin text-muted small"><strong>Startup Command Variable:</strong> <code>' + escapeHtml(item.env_variable) + '</code></p> \
-                                <p class="no-margin text-muted small"><strong>Input Rules:</strong> <code>' + escapeHtml(item.rules) + '</code></p> \
+                            <div class="pt-4 space-y-1 border-t border-base-300"> \
+                                <p class="text-[10px] font-black uppercase tracking-widest opacity-40">Startup Command Variable</p> \
+                                <code class="text-xs text-primary font-bold">' + escapeHtml(item.env_variable) + '</code> \
+                                <p class="text-[10px] font-black uppercase tracking-widest opacity-40 mt-2">Input Rules</p> \
+                                <code class="text-xs text-base-content/60">' + escapeHtml(item.rules) + '</code> \
                             </div> \
                         </div> \
                     </div>';

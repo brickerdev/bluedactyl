@@ -1,321 +1,408 @@
 @extends('layouts.admin')
 
 @section('title')
-  {{ $node->name }}: Settings
+    {{ $node->name }}: Settings
 @endsection
 
 @section('content-header')
-  <h1>{{ $node->name }}<small>Configure your node settings.</small></h1>
-  <ol class="breadcrumb">
-    <li><a href="{{ route('admin.index') }}">Admin</a></li>
-    <li><a href="{{ route('admin.nodes') }}">Nodes</a></li>
-    <li><a href="{{ route('admin.nodes.view', $node->id) }}">{{ $node->name }}</a></li>
-    <li class="active">Settings</li>
-  </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter text-base-content uppercase">{{ $node->name }}</h1>
+            <p class="text-base-content/60 text-sm font-medium">Configure your node settings.</p>
+        </div>
+        <div class="text-sm breadcrumbs text-base-content/60 font-medium">
+            <ul>
+                <li><a href="{{ route('admin.index') }}" class="hover:text-primary transition-colors">Admin</a></li>
+                <li><a href="{{ route('admin.nodes') }}" class="hover:text-primary transition-colors">Nodes</a></li>
+                <li><a href="{{ route('admin.nodes.view', $node->id) }}"
+                        class="hover:text-primary transition-colors">{{ $node->name }}</a></li>
+                <li class="text-base-content">Settings</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-  <div class="row">
-    <div class="col-xs-12">
-    <div class="nav-tabs-custom nav-tabs-floating">
-      <ul class="nav nav-tabs">
-      <li><a href="{{ route('admin.nodes.view', $node->id) }}">About</a></li>
-      <li class="active"><a href="{{ route('admin.nodes.view.settings', $node->id) }}">Settings</a></li>
-      <li><a href="{{ route('admin.nodes.view.configuration', $node->id) }}">Configuration</a></li>
-      <li><a href="{{ route('admin.nodes.view.allocation', $node->id) }}">Allocation</a></li>
-      <li><a href="{{ route('admin.nodes.view.servers', $node->id) }}">Servers</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-  <form action="{{ route('admin.nodes.view.settings', $node->id) }}" method="POST">
-    <div class="row">
-    <div class="col-sm-6">
-      <div class="box">
-      <div class="box-header with-border">
-        <h3 class="box-title">Settings</h3>
-      </div>
-      <div class="box-body row">
-        <div class="form-group col-xs-12">
-        <label for="name" class="control-label">Node Name</label>
-        <div>
-          <input type="text" autocomplete="off" name="name" class="form-control"
-          value="{{ old('name', $node->name) }}" />
-          <p class="text-muted"><small>Character limits: <code>a-zA-Z0-9_.-</code> and <code>[Space]</code> (min 1,
-            max 100 characters).</small></p>
+    <div class="mb-8">
+        <div
+            class="tabs tabs-box bg-base-200/50 p-1 rounded-xl inline-flex border border-base-300 whitespace-nowrap overflow-x-auto max-w-full">
+            <a href="{{ route('admin.nodes.view', $node->id) }}" class="tab !rounded-lg">About</a>
+            <a href="{{ route('admin.nodes.view.settings', $node->id) }}"
+                class="tab tab-active !rounded-lg font-bold">Settings</a>
+            <a href="{{ route('admin.nodes.view.configuration', $node->id) }}" class="tab !rounded-lg">Configuration</a>
+            <a href="{{ route('admin.nodes.view.allocation', $node->id) }}" class="tab !rounded-lg">Allocation</a>
+            <a href="{{ route('admin.nodes.view.servers', $node->id) }}" class="tab !rounded-lg">Servers</a>
         </div>
-        </div>
-        <div class="form-group col-xs-12">
-        <label for="description" class="control-label">Description</label>
-        <div>
-          <textarea name="description" id="description" rows="4"
-          class="form-control">{{ $node->description }}</textarea>
-        </div>
-        </div>
-        <div class="form-group col-xs-12">
-        <label for="name" class="control-label">Location</label>
-        <div>
-          <select name="location_id" class="form-control">
-          @foreach($locations as $location)
-                <option value="{{ $location->id }}" {{ (old('location_id', $node->location_id) === $location->id) ? 'selected' : '' }}>{{ $location->long }} ({{ $location->short }})</option>
-          @endforeach
-          </select>
-        </div>
-        <label for="pDaemonType" class="form-label">Daemon</label>
-        <div>
-        <select name="daemonType" id="pDaemonType" class="form-control">
-            @foreach($daemonTypes as $daemon)
-                <option value="{{ $daemon }}" {{ $daemon == old('daemon_type', $node->daemonType) ? 'selected' : '' }}>{{ $daemon }}</option>
-            @endforeach
-        </select>
-        </div>
-        <label for="public" class="control-label">Allow Automatic Allocation <sup><a data-toggle="tooltip"
-            data-placement="top" title="Allow automatic allocation to this Node?">?</a></sup></label>
-        <div>
-          <input type="radio" name="public" value="1" {{ (old('public', $node->public)) ? 'checked' : '' }}
-          id="public_1" checked> <label for="public_1" style="padding-left:5px;">Yes</label><br />
-          <input type="radio" name="public" value="0" {{ (old('public', $node->public)) ? '' : 'checked' }}
-          id="public_0"> <label for="public_0" style="padding-left:5px;">No</label>
-        </div>
-        <label for="public" class="control-label">Domain by Allocation Alias <sup><a data-toggle="tooltip"
-            data-placement="top" title="Allow Ip Aliases to be used instead of allocation ip for domain management">?</a></sup></label>
-        <div>
-          <input type="radio" name="trust_alias" value="1" {{ (old('trustalias', $node->trust_alias)) ? 'checked' : '' }}
-          id="trust_alias_1" checked> <label for="public_1" style="padding-left:5px;">Yes</label><br />
-          <input type="radio" name="trust_alias" value="0" {{ (old('trustalias', $node->trust_alias)) ? '' : 'checked' }}
-          id="trust_alias_0"> <label for="trustalias_0" style="padding-left:5px;">No</label>
-        </div>
-        </div>
-        <div class="form-group col-xs-12">
-        <label for="fqdn" class="control-label">Public Fully Qualified Domain Name</label>
-        <div>
-          <input type="text" autocomplete="off" name="fqdn" class="form-control"
-          value="{{ old('fqdn', $node->fqdn) }}" />
-        </div>
-        <p class="text-muted">
-          <small>
-          Domain name that browsers will use to connect to {{ $node->daemonType }} (e.g <code>{{ $node->daemonType }}.example.com</code>).
-          An IP address may be used <em>only</em> if you are not using SSL for this node.
-          <a tabindex="0" data-toggle="popover" data-trigger="focus" title="Why do I need a FQDN?"
-            data-content="In order to secure communications between your server and this node we use SSL. We cannot generate a SSL certificate for IP Addresses, and as such you will need to provide a FQDN.">Why?</a>
-          </small>
-        </p>
-        </div>
-        <div class="form-group col-xs-12">
-        <label for="internal_fqdn" class="control-label">
-          Internal FQDN
-          <strong>(Optional)</strong>
-        </label>
-        <div>
-          <input type="text" autocomplete="off" name="internal_fqdn" class="form-control"
-          value="{{ old('internal_fqdn', $node->internal_fqdn) }}" />
-        </div>
-        <p class="text-muted">
-          <small>
-          <strong>Optional:</strong>
-          Leave blank to use the Public FQDN for panel-to-{{ $node->daemonType }} communication.
-          If specified, this internal domain name will be used for panel-to-{{ $node->daemonType }} communication instead
-          (e.g <code>{{ $node->daemonType }}-internal.example.com</code> or <code>10.0.0.5</code>).
-          Useful for internal networks where the panel needs to communicate with {{ $node->daemonType }} using a
-          different address than what browsers use.
-          </small>
-        </p>
-        </div>
-        <div class="form-group col-xs-12">
-        <label class="form-label"><span class="label label-warning"><i class="fa fa-power-off"></i></span>
-          Communicate Over SSL</label>
-        <div>
-          <div class="radio radio-success radio-inline">
-          <input type="radio" id="pSSLTrue" value="https" name="scheme" {{ (old('scheme', $node->scheme) === 'https') ? 'checked' : '' }}>
-          <label for="pSSLTrue"> Use SSL Connection</label>
-          </div>
-          <div class="radio radio-danger radio-inline">
-          <input type="radio" id="pSSLFalse" value="http" name="scheme" {{ (old('scheme', $node->scheme) !== 'https') ? 'checked' : '' }}>
-          <label for="pSSLFalse"> Use HTTP Connection</label>
-          </div>
-        </div>
-        <p class="text-muted small">In most cases you should select to use a SSL connection. If using an IP Address
-          or you do not wish to use SSL at all, select a HTTP connection.</p>
-        </div>
-        <div class="form-group col-xs-12">
-        <label class="form-label"><span class="label label-warning"><i class="fa fa-power-off"></i></span> Behind
-          Proxy</label>
-        <div>
-          <div class="radio radio-success radio-inline">
-          <input type="radio" id="pProxyFalse" value="0" name="behind_proxy" {{ (old('behind_proxy', $node->behind_proxy) == false) ? 'checked' : '' }}>
-          <label for="pProxyFalse"> Not Behind Proxy </label>
-          </div>
-          <div class="radio radio-info radio-inline">
-          <input type="radio" id="pProxyTrue" value="1" name="behind_proxy" {{ (old('behind_proxy', $node->behind_proxy) == true) ? 'checked' : '' }}>
-          <label for="pProxyTrue"> Behind Proxy </label>
-          </div>
-        </div>
-        <p class="text-muted small">If you are running the daemon behind a proxy such as Cloudflare, select this to
-          have the daemon skip looking for certificates on boot.</p>
-        </div>
-        <div class="form-group col-xs-12">
-        <label class="form-label"><span class="label label-warning"><i class="fa fa-wrench"></i></span> Maintenance
-          Mode</label>
-        <div>
-          <div class="radio radio-success radio-inline">
-          <input type="radio" id="pMaintenanceFalse" value="0" name="maintenance_mode" {{ (old('maintenance_mode', $node->maintenance_mode) == false) ? 'checked' : '' }}>
-          <label for="pMaintenanceFalse"> Disabled</label>
-          </div>
-          <div class="radio radio-warning radio-inline">
-          <input type="radio" id="pMaintenanceTrue" value="1" name="maintenance_mode" {{ (old('maintenance_mode', $node->maintenance_mode) == true) ? 'checked' : '' }}>
-          <label for="pMaintenanceTrue"> Enabled</label>
-          </div>
-        </div>
-        <p class="text-muted small">If the node is marked as 'Under Maintenance' users won't be able to access
-          servers that are on this node.</p>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="col-sm-6">
-      <div class="box">
-      <div class="box-header with-border">
-        <h3 class="box-title">Allocation Limits</h3>
-      </div>
-      <div class="box-body row">
-        <div class="col-xs-12">
-        <div class="row">
-          <div class="form-group col-xs-6">
-          <label for="memory" class="control-label">Total Memory</label>
-          <div class="input-group">
-            <input type="text" name="memory" class="form-control" data-multiplicator="true"
-            value="{{ old('memory', $node->memory) }}" />
-            <span class="input-group-addon">MiB</span>
-          </div>
-          </div>
-          <div class="form-group col-xs-6">
-          <label for="memory_overallocate" class="control-label">Overallocate</label>
-          <div class="input-group">
-            <input type="text" name="memory_overallocate" class="form-control"
-            value="{{ old('memory_overallocate', $node->memory_overallocate) }}" />
-            <span class="input-group-addon">%</span>
-          </div>
-          </div>
-        </div>
-        <p class="text-muted small">Enter the total amount of memory available on this node for allocation to
-          servers. You may also provide a percentage that can allow allocation of more than the defined memory.</p>
-        </div>
-        <div class="col-xs-12">
-        <div class="row">
-          <div class="form-group col-xs-6">
-          <label for="disk" class="control-label">Disk Space</label>
-          <div class="input-group">
-            <input type="text" name="disk" class="form-control" data-multiplicator="true"
-            value="{{ old('disk', $node->disk) }}" />
-            <span class="input-group-addon">MiB</span>
-          </div>
-          </div>
-          <div class="form-group col-xs-6">
-          <label for="disk_overallocate" class="control-label">Overallocate</label>
-          <div class="input-group">
-            <input type="text" name="disk_overallocate" class="form-control"
-            value="{{ old('disk_overallocate', $node->disk_overallocate) }}" />
-            <span class="input-group-addon">%</span>
-          </div>
-          </div>
-        </div>
-        <p class="text-muted small">Enter the total amount of disk space available on this node for server
-          allocation. You may also provide a percentage that will determine the amount of disk space over the set
-          limit to allow.</p>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="col-sm-6">
-      <div class="box">
-      <div class="box-header with-border">
-        <h3 class="box-title">General Configuration</h3>
-      </div>
-      <div class="box-body row">
-        <div class="form-group col-xs-12">
-        <label for="disk_overallocate" class="control-label">Maximum Web Upload Filesize</label>
-        <div class="input-group">
-          <input type="text" name="upload_size" class="form-control"
-          value="{{ old('upload_size', $node->upload_size) }}" />
-          <span class="input-group-addon">MiB</span>
-        </div>
-        <p class="text-muted"><small>Enter the maximum size of files that can be uploaded through the web-based file (1-1024)
-          manager. Cloudflare only supports 100mib on free plan if behind cloudflare tunnels</small></p>
-        </div>
-        <div class="col-xs-12">
-        <div class="row">
-          <div class="form-group col-md-6">
-          <label for="daemonListen" class="control-label"><span class="label label-warning"><i
-              class="fa fa-power-off"></i></span> Daemon Port</label>
-          <div>
-            <input type="text" name="daemonListen" class="form-control"
-            value="{{ old('daemonListen', $node->daemonListen) }}" />
-          </div>
-          </div>
-          <div class="form-group col-md-6">
-          <label for="daemonSFTP" class="control-label"><span class="label label-warning"><i
-              class="fa fa-power-off"></i></span> Daemon SFTP Port</label>
-          <div>
-            <input type="text" name="daemonSFTP" class="form-control"
-            value="{{ old('daemonSFTP', $node->daemonSFTP) }}" />
-          </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-          <p class="text-muted"><small>The daemon runs its own SFTP management container and does not use the SSHd
-            process on the main physical server. <Strong>Do not use the same port that you have assigned for
-              your physical server's SSH process.</strong></small></p>
-          </div>
-        </div>
-        </div>
-      </div>
-      </div>
     </div>
 
-    <div class="col-sm-6">
-      <div class="box">
-      <div class="box-header with-border">
-        <h3 class="box-title">Backup Config</h3>
-      </div>
-      <div class="box-body row">
-        <div class="form-group col-xs-12">
-        <label for="pBackupDisk" class="form-label">Backup Disk</label>
-        <div>
-        <select name="backupDisk" id="pBackupDisk" class="form-control">
-            <!-- Populated via Script-->
-        </select>
-        </div>
-        </div>
-      </div>
-      </div>
-    </div>
+    <form action="{{ route('admin.nodes.view.settings', $node->id) }}" method="POST">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Settings Card -->
+            <div class="card bg-base-200/50 shadow-sm backdrop-blur-md border border-base-300">
+                <div class="card-body p-6 space-y-6">
+                    <h3
+                        class="text-xl font-black tracking-tighter text-base-content uppercase border-b border-base-300 pb-4">
+                        Settings</h3>
 
-    <div class="col-xs-12">
-      <div class="box box-primary">
-      <div class="box-header with-border">
-        <h3 class="box-title">Save Settings</h3>
-      </div>
-      <div class="box-body row">
-        <div class="form-group col-sm-6">
-        <div>
-          <input type="checkbox" name="reset_secret" id="reset_secret" /> <label for="reset_secret"
-          class="control-label">Reset Daemon Master Key</label>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Node
+                                Name</span>
+                        </label>
+                        <input type="text" autocomplete="off" name="name"
+                            class="input input-bordered focus:input-primary transition-all bg-base-100"
+                            value="{{ old('name', $node->name) }}" required />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/40 italic">Character limits:
+                                <code>a-zA-Z0-9_.-</code> and <code>[Space]</code>.</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span
+                                class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Description</span>
+                        </label>
+                        <textarea name="description" id="description" rows="4"
+                            class="textarea textarea-bordered focus:textarea-primary transition-all h-24 bg-base-100">{{ $node->description }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Location</span>
+                            </label>
+                            <select name="location_id" class="select select-bordered focus:select-primary bg-base-100">
+                                @foreach ($locations as $location)
+                                    <option value="{{ $location->id }}"
+                                        {{ old('location_id', $node->location_id) === $location->id ? 'selected' : '' }}>
+                                        {{ $location->long }} ({{ $location->short }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Daemon
+                                    Type</span>
+                            </label>
+                            <select name="daemonType" id="pDaemonType"
+                                class="select select-bordered focus:select-primary bg-base-100">
+                                @foreach ($daemonTypes as $daemon)
+                                    <option value="{{ $daemon }}"
+                                        {{ $daemon == old('daemon_type', $node->daemonType) ? 'selected' : '' }}>
+                                        {{ $daemon }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Auto
+                                    Allocation</span>
+                                <div class="tooltip" data-tip="Allow automatic allocation to this Node?">
+                                    <i class="fa fa-question-circle opacity-30"></i>
+                                </div>
+                            </label>
+                            <div class="flex gap-4">
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" name="public" value="1" class="radio radio-primary radio-sm"
+                                        {{ old('public', $node->public) ? 'checked' : '' }} id="public_1">
+                                    <span class="label-text text-xs font-bold uppercase">Yes</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" name="public" value="0" class="radio radio-primary radio-sm"
+                                        {{ old('public', $node->public) ? '' : 'checked' }} id="public_0">
+                                    <span class="label-text text-xs font-bold uppercase">No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Trust
+                                    Alias</span>
+                                <div class="tooltip"
+                                    data-tip="Allow Ip Aliases to be used instead of allocation ip for domain management">
+                                    <i class="fa fa-question-circle opacity-30"></i>
+                                </div>
+                            </label>
+                            <div class="flex gap-4">
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" name="trust_alias" value="1"
+                                        class="radio radio-primary radio-sm"
+                                        {{ old('trustalias', $node->trust_alias) ? 'checked' : '' }} id="trust_alias_1">
+                                    <span class="label-text text-xs font-bold uppercase">Yes</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2">
+                                    <input type="radio" name="trust_alias" value="0"
+                                        class="radio radio-primary radio-sm"
+                                        {{ old('trustalias', $node->trust_alias) ? '' : 'checked' }} id="trust_alias_0">
+                                    <span class="label-text text-xs font-bold uppercase">No</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span
+                                class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Public
+                                FQDN</span>
+                        </label>
+                        <input type="text" autocomplete="off" name="fqdn"
+                            class="input input-bordered focus:input-primary transition-all bg-base-100"
+                            value="{{ old('fqdn', $node->fqdn) }}" />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/40 italic">Domain name browsers use to connect to
+                                {{ $node->daemonType }}.</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span
+                                class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Internal
+                                FQDN <span class="opacity-50 font-normal">(Optional)</span></span>
+                        </label>
+                        <input type="text" autocomplete="off" name="internal_fqdn"
+                            class="input input-bordered focus:input-primary transition-all bg-base-100"
+                            value="{{ old('internal_fqdn', $node->internal_fqdn) }}" />
+                    </div>
+
+                    <div class="divider uppercase text-[10px] font-black tracking-[0.2em] opacity-30">Connection & Status
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="form-control">
+                            <label class="label"><span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">SSL</span></label>
+                            <div class="flex flex-col gap-2">
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pSSLTrue" value="https" name="scheme"
+                                        class="radio radio-success radio-sm"
+                                        {{ old('scheme', $node->scheme) === 'https' ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">HTTPS</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pSSLFalse" value="http" name="scheme"
+                                        class="radio radio-error radio-sm"
+                                        {{ old('scheme', $node->scheme) !== 'https' ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">HTTP</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Proxy</span></label>
+                            <div class="flex flex-col gap-2">
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pProxyFalse" value="0" name="behind_proxy"
+                                        class="radio radio-primary radio-sm"
+                                        {{ old('behind_proxy', $node->behind_proxy) == false ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">None</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pProxyTrue" value="1" name="behind_proxy"
+                                        class="radio radio-info radio-sm"
+                                        {{ old('behind_proxy', $node->behind_proxy) == true ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">Behind Proxy</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Maintenance</span></label>
+                            <div class="flex flex-col gap-2">
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pMaintenanceFalse" value="0" name="maintenance_mode"
+                                        class="radio radio-success radio-sm"
+                                        {{ old('maintenance_mode', $node->maintenance_mode) == false ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">Disabled</span>
+                                </label>
+                                <label class="label cursor-pointer flex items-center gap-2 justify-start">
+                                    <input type="radio" id="pMaintenanceTrue" value="1" name="maintenance_mode"
+                                        class="radio radio-warning radio-sm"
+                                        {{ old('maintenance_mode', $node->maintenance_mode) == true ? 'checked' : '' }}>
+                                    <span class="label-text text-xs font-bold uppercase">Enabled</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Allocation Limits -->
+                <div class="card bg-base-200/50 shadow-sm backdrop-blur-md border border-base-300">
+                    <div class="card-body p-6 space-y-6">
+                        <h3
+                            class="text-xl font-black tracking-tighter text-base-content uppercase border-b border-base-300 pb-4">
+                            Allocation Limits</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Total
+                                        Memory</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="memory"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all bg-base-100"
+                                        data-multiplicator="true" value="{{ old('memory', $node->memory) }}" />
+                                    <span class="btn btn-disabled join-item bg-base-300 text-xs font-bold">MiB</span>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Overallocate</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="memory_overallocate"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all bg-base-100"
+                                        value="{{ old('memory_overallocate', $node->memory_overallocate) }}" />
+                                    <span class="btn btn-disabled join-item bg-base-300 text-xs font-bold">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Disk
+                                        Space</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="disk"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all bg-base-100"
+                                        data-multiplicator="true" value="{{ old('disk', $node->disk) }}" />
+                                    <span class="btn btn-disabled join-item bg-base-300 text-xs font-bold">MiB</span>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Overallocate</span>
+                                </label>
+                                <div class="join w-full">
+                                    <input type="text" name="disk_overallocate"
+                                        class="input input-bordered join-item w-full focus:input-primary transition-all bg-base-100"
+                                        value="{{ old('disk_overallocate', $node->disk_overallocate) }}" />
+                                    <span class="btn btn-disabled join-item bg-base-300 text-xs font-bold">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Configuration -->
+                <div class="card bg-base-200/50 shadow-sm backdrop-blur-md border border-base-300">
+                    <div class="card-body p-6 space-y-6">
+                        <h3
+                            class="text-xl font-black tracking-tighter text-base-content uppercase border-b border-base-300 pb-4">
+                            General Configuration</h3>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Max
+                                    Web Upload Size</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" name="upload_size"
+                                    class="input input-bordered join-item w-full focus:input-primary transition-all bg-base-100"
+                                    value="{{ old('upload_size', $node->upload_size) }}" />
+                                <span class="btn btn-disabled join-item bg-base-300 text-xs font-bold">MiB</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Daemon
+                                        Port</span>
+                                </label>
+                                <input type="text" name="daemonListen"
+                                    class="input input-bordered focus:input-primary transition-all bg-base-100"
+                                    value="{{ old('daemonListen', $node->daemonListen) }}" />
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span
+                                        class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">SFTP
+                                        Port</span>
+                                </label>
+                                <input type="text" name="daemonSFTP"
+                                    class="input input-bordered focus:input-primary transition-all bg-base-100"
+                                    value="{{ old('daemonSFTP', $node->daemonSFTP) }}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Config -->
+                <div class="card bg-base-200/50 shadow-sm backdrop-blur-md border border-base-300">
+                    <div class="card-body p-6 space-y-6">
+                        <h3
+                            class="text-xl font-black tracking-tighter text-base-content uppercase border-b border-base-300 pb-4">
+                            Backup Config</h3>
+                        <div class="form-control">
+                            <label class="label">
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/60">Backup
+                                    Disk</span>
+                            </label>
+                            <select name="backupDisk" id="pBackupDisk"
+                                class="select select-bordered focus:select-primary bg-base-100">
+                                <!-- Populated via Script-->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Settings -->
+                <div class="card bg-primary/5 border border-primary/20 shadow-sm">
+                    <div class="card-body p-6">
+                        <h3 class="text-xl font-black tracking-tighter text-primary uppercase mb-4">Save Settings</h3>
+                        <div class="form-control mb-6">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" name="reset_secret" id="reset_secret"
+                                    class="checkbox checkbox-primary checkbox-sm" />
+                                <span
+                                    class="label-text font-bold uppercase text-xs tracking-widest text-base-content/70">Reset
+                                    Daemon Master Key</span>
+                            </label>
+                            <p class="text-[10px] text-base-content/40 mt-2 italic">
+                                Resetting the key will void any request coming from the old key. Suggest changing regularly
+                                for security.
+                            </p>
+                        </div>
+                        <div class="card-actions justify-end">
+                            {!! method_field('PATCH') !!}
+                            {!! csrf_field() !!}
+                            <button type="submit"
+                                class="btn btn-primary px-12 font-bold uppercase tracking-wider shadow-lg shadow-primary/20">Save
+                                Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="text-muted"><small>Resetting the daemon master key will void any request coming from the old key.
-          This key is used for all sensitive operations on the daemon including server creation and deletion. We
-          suggest changing this key regularly for security.</small></p>
-        </div>
-      </div>
-      <div class="box-footer">
-        {!! method_field('PATCH') !!}
-        {!! csrf_field() !!}
-        <button type="submit" class="btn btn-primary pull-right">Save Changes</button>
-      </div>
-      </div>
-    </div>
-    </div>
-  </form>
+    </form>
 @endsection
 
 @section('footer-scripts')
@@ -336,7 +423,7 @@
                     option.value = disk;
                     option.textContent = disk;
 
-                    if (disk === '{{ old("backupDisk", $node->backupDisk) }}') {
+                    if (disk === '{{ old('backupDisk', $node->backupDisk) }}') {
                         option.selected = true;
                     }
 
@@ -345,14 +432,29 @@
             }
 
             updateBackupDisks();
-
             daemonSelect.addEventListener('change', updateBackupDisks);
 
-            $('[data-toggle="popover"]').popover({
-                placement: 'auto'
+            // Initialize select2 for location
+            $('select[name="location_id"]').select2({
+                theme: 'daisyui'
             });
-
-            $('select[name="location_id"]').select2();
         });
     </script>
+    <style>
+        .select2-container--default .select2-selection--single {
+            @apply bg-base-100 border-base-300 rounded-lg h-12 flex items-center px-2;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            @apply text-base-content leading-tight;
+        }
+
+        .select2-dropdown {
+            @apply bg-base-100 border-base-300 shadow-xl rounded-lg overflow-hidden;
+        }
+
+        .select2-results__option--highlighted[aria-selected] {
+            @apply bg-primary text-primary-content;
+        }
+    </style>
 @endsection
