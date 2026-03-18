@@ -232,7 +232,7 @@ function initUserIdSelect(data) {
 
             return (
                 '<div class="user-block"> \
-                <img class="img-circle img-bordered-xs" src="https://www.gravatar.com/avatar/' +
+                <img class="img-circle img-bordered-xs" src="https://cravatar.cn/avatar/' +
                 escapeHtml(data.md5) +
                 '?s=120" alt="User Image"> \
                 <span class="username"> \
@@ -254,7 +254,7 @@ function initUserIdSelect(data) {
             return (
                 '<div> \
                 <span> \
-                    <img class="img-rounded img-bordered-xs" src="https://www.gravatar.com/avatar/' +
+                    <img class="img-rounded img-bordered-xs" src="https://cravatar.cn/avatar/' +
                 escapeHtml(data.md5) +
                 '?s=120" style="height:28px;margin-top:-4px;" alt="User Image"> \
                 </span> \

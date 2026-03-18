@@ -87,7 +87,7 @@
                                             <div
                                                 class="w-8 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-1">
                                                 <img
-                                                    src="https://www.gravatar.com/avatar/{{ md5(strtolower($server->user->email)) }}?s=100" />
+                                                    src="https://cravatar.cn/avatar/{{ md5(strtolower($server->user->email)) }}?s=100" />
                                             </div>
                                         </div>
                                         <div class="flex flex-col">

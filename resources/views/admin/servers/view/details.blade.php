@@ -158,13 +158,13 @@
                 if (data.loading) return escapeHtml(data.text);
 
                 return '<div class="user-block"> \
-                    <img src="https://www.gravatar.com/avatar/' + escapeHtml(data.md5) + '?s=120" alt="User Image"> \
-                    <div> \
-                        <span class="username">' + escapeHtml(data.name_first) + ' ' + escapeHtml(data.name_last) + '</span> \
-                        <span class="description"><strong>' + escapeHtml(data.email) + '</strong> - ' + escapeHtml(data
+                        <img src="https://cravatar.cn/avatar/' + escapeHtml(data.md5) + '?s=120" alt="User Image"> \
+                        <div> \
+                            <span class="username">' + escapeHtml(data.name_first) + ' ' + escapeHtml(data.name_last) + '</span> \
+                            <span class="description"><strong>' + escapeHtml(data.email) + '</strong> - ' + escapeHtml(data
                     .username) + '</span> \
-                    </div> \
-                </div>';
+                        </div> \
+                    </div>';
             },
             templateSelection: function(data) {
                 if (typeof data.name_first === 'undefined') {
@@ -178,13 +178,14 @@
                 }
 
                 return '<div class="flex items-center gap-2"> \
-                    <img class="rounded-full border border-base-300" src="https://www.gravatar.com/avatar/' + escapeHtml(
+                        <img class="rounded-full border border-base-300" src="https://cravatar.cn/avatar/' + escapeHtml(
                     data.md5) + '?s=120" style="height:24px;" alt="User Image"> \
-                    <span class="text-sm"> \
-                        ' + escapeHtml(data.name_first) + ' ' + escapeHtml(data.name_last) + ' (<strong>' + escapeHtml(data
+                        <span class="text-sm"> \
+                            ' + escapeHtml(data.name_first) + ' ' + escapeHtml(data.name_last) + ' (<strong>' + escapeHtml(
+                    data
                     .email) + '</strong>) \
-                    </span> \
-                </div>';
+                        </span> \
+                    </div>';
             }
         });
     </script>

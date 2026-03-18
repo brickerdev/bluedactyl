@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -21,6 +21,14 @@
 
     @include('layouts.scripts')
 
+    <script>
+        // Theme persistence - execute as early as possible to prevent flash
+        (function() {
+            const theme = localStorage.getItem('admin-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
     @section('scripts')
         {!! Theme::css('vendor/select2/select2.min.css?t={cache-version}') !!}
         {!! Theme::css('vendor/sweetalert/sweetalert.min.css?t={cache-version}') !!}
@@ -28,16 +36,70 @@
         {!! Theme::css('css/pterodactyl.css?t={cache-version}') !!}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="/css/admin/bootstrap-icons.css">
+        <link rel="stylesheet" href="/css/admin/remixicon.css">
 
-        {{-- daisyUI 5 & Tailwind CSS 4 CDN --}}
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        {{-- daisyUI 5 & Tailwind CSS 4 --}}
+        <link href="/css/admin/daisyui.css" rel="stylesheet" type="text/css" />
+        <script src="/css/admin/tailwind-browser.js"></script>
+
+        <style>
+            .select2-container--default .select2-selection--single,
+            .select2-container--default .select2-selection--multiple {
+                background-color: var(--color-base-100, oklch(var(--b1))) !important;
+                border-color: var(--color-base-300, oklch(var(--b3))) !important;
+                border-radius: 0.75rem !important;
+                height: 3rem !important;
+                display: flex !important;
+                align-items: center !important;
+                padding: 0 0.5rem !important;
+                color: var(--color-base-content, oklch(var(--bc))) !important;
+                transition: all 0.2s;
+            }
+
+            .select2-container--default.select2-container--focus .select2-selection--single,
+            .select2-container--default.select2-container--focus .select2-selection--multiple {
+                border-color: var(--color-primary, oklch(var(--p))) !important;
+                box-shadow: 0 0 0 2px var(--color-primary-focus, oklch(var(--p) / 0.2)) !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                color: inherit !important;
+                font-weight: 500 !important;
+                padding: 0 !important;
+            }
+
+            .select2-dropdown {
+                background-color: var(--color-base-200, oklch(var(--b2))) !important;
+                border-color: var(--color-base-300, oklch(var(--b3))) !important;
+                border-radius: 0.75rem !important;
+                box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+                color: var(--color-base-content, oklch(var(--bc))) !important;
+                overflow: hidden !important;
+            }
+
+            .select2-results__option--highlighted[aria-selected] {
+                background-color: var(--color-primary, oklch(var(--p))) !important;
+                color: var(--color-primary-content, oklch(var(--pc))) !important;
+            }
+
+            .select2-container--default .select2-results__option[aria-selected=true] {
+                background-color: var(--color-primary-focus, oklch(var(--p) / 0.2)) !important;
+                color: var(--color-primary, oklch(var(--p))) !important;
+            }
+
+            .select2-search--dropdown .select2-search__field {
+                background-color: var(--color-base-300, oklch(var(--b3))) !important;
+                border-color: var(--color-base-300, oklch(var(--b3))) !important;
+                border-radius: 0.5rem !important;
+                color: var(--color-base-content, oklch(var(--bc))) !important;
+            }
+        </style>
 
         <!--[if lt IE 9]>
-                                <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-                                <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-                                <![endif]-->
+                                    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+                                    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+                                    <![endif]-->
     @show
 </head>
 
@@ -82,105 +144,13 @@
                         </div>
                         <ul tabindex="0"
                             class="dropdown-content bg-base-300 rounded-box z-[1] mt-3 w-52 p-2 shadow-2xl border border-base-content/10 max-h-96 overflow-y-auto">
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Light" value="light" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Dark" value="dark" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Cupcake" value="cupcake" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Bumblebee" value="bumblebee" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Corporate" value="corporate" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Synthwave" value="synthwave" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Retro" value="retro" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Cyberpunk" value="cyberpunk" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Valentine" value="valentine" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Halloween" value="halloween" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Garden" value="garden" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Forest" value="forest" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Aqua" value="aqua" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Lofi" value="lofi" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Pastel" value="pastel" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Fantasy" value="fantasy" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Wireframe" value="wireframe" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Black" value="black" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Luxury" value="luxury" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Dracula" value="dracula" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Cmyk" value="cmyk" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Autumn" value="autumn" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Business" value="business" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Acid" value="acid" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Lemonade" value="lemonade" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Night" value="night" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Coffee" value="coffee" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Winter" value="winter" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Dim" value="dim" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Nord" value="nord" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Sunset" value="sunset" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Abyss" value="abyss" /></li>
-                            <li><input type="radio" name="theme-dropdown"
-                                    class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                                    aria-label="Silk" value="silk" /></li>
+                            @foreach (['light', 'dark', 'cupcake', 'bumblebee', 'emerald', 'corporate', 'synthwave', 'retro', 'cyberpunk', 'valentine', 'halloween', 'garden', 'forest', 'aqua', 'lofi', 'pastel', 'fantasy', 'wireframe', 'black', 'luxury', 'dracula', 'cmyk', 'autumn', 'business', 'acid', 'lemonade', 'night', 'coffee', 'winter', 'dim', 'nord', 'sunset', 'caramellatte', 'abyss', 'silk'] as $theme)
+                                <li>
+                                    <input type="radio" name="theme-dropdown"
+                                        class="theme-controller btn btn-sm btn-block btn-ghost justify-start font-bold uppercase tracking-tighter text-[10px]"
+                                        aria-label="{{ ucfirst($theme) }}" value="{{ $theme }}" />
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
 
@@ -188,7 +158,7 @@
                         <div tabindex="0" role="button"
                             class="btn btn-ghost btn-circle avatar border border-base-300">
                             <div class="w-10 rounded-full">
-                                <img src="https://www.gravatar.com/avatar/{{ md5(strtolower(Auth::user()->email)) }}?s=160"
+                                <img src="https://cravatar.cn/avatar/{{ md5(strtolower(Auth::user()->email)) }}?s=160"
                                     alt="User Avatar" />
                             </div>
                         </div>
@@ -370,12 +340,10 @@
         <script>
             keyboardeventKeyPolyfill.polyfill();
 
-            // Theme persistence
-            const theme = localStorage.getItem('admin-theme') || 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-
+            // Theme controller sync
+            const currentTheme = localStorage.getItem('admin-theme') || 'light';
             document.querySelectorAll('.theme-controller').forEach(input => {
-                if (input.value === theme) {
+                if (input.value === currentTheme) {
                     input.checked = true;
                 }
                 input.addEventListener('change', (e) => {

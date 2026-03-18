@@ -20,80 +20,78 @@
 @endsection
 
 @section('content')
-    <div class="grid grid-cols-1 gap-8">
+    <div class="flex flex-col gap-8">
         <!-- Hero Section -->
-        <div class="hero bg-base-200 rounded-3xl border border-base-300 overflow-hidden shadow-xl">
-            <div class="hero-content flex-col lg:flex-row p-8 lg:p-12 gap-8">
-                <div class="bg-primary/10 p-6 rounded-2xl border border-primary/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+        <div class="hero bg-base-200/50 backdrop-blur-md rounded-3xl border border-base-300 overflow-hidden shadow-xl">
+            <div class="hero-content flex-col lg:flex-row p-8 lg:p-12 gap-8 w-full max-w-none justify-start">
+                <div class="bg-primary text-primary-content p-6 rounded-2xl shadow-2xl shadow-primary/20 shrink-0">
+                    <i class="ri-flashlight-fill text-5xl"></i>
                 </div>
-                <div class="text-center lg:text-left">
-                    <h2 class="text-3xl font-black mb-2">Welcome to Bluedactyl</h2>
-                    <p class="text-base-content/70 text-lg mb-4">You are running version <code class="badge badge-primary font-mono py-3 px-4">{{ config('app.version') }}</code>. Your system is healthy and all services are operational.</p>
-                    <div class="flex flex-wrap gap-2 justify-center lg:justify-start">
-                        <div class="badge badge-outline badge-lg opacity-50">Laravel {{ App::version() }}</div>
-                        <div class="badge badge-outline badge-lg opacity-50">PHP {{ phpversion() }}</div>
+                <div class="text-center lg:text-left grow">
+                    <h2 class="text-3xl font-black mb-2 tracking-tighter uppercase">Welcome to Bluedactyl</h2>
+                    <p class="text-base-content/70 text-lg mb-6 max-w-2xl">You are running version <span class="badge badge-primary badge-outline font-mono font-bold px-3">{{ config('app.version') }}</span>. Your system is healthy and all services are operational.</p>
+                    <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+                        <div class="badge badge-soft badge-md font-bold opacity-70">Laravel {{ App::version() }}</div>
+                        <div class="badge badge-soft badge-md font-bold opacity-70">PHP {{ phpversion() }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Metrics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
                 <div class="card-body p-6">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-3 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-                            <i class="bi bi-cpu text-2xl"></i>
+                            <i class="ri-cpu-line text-2xl"></i>
                         </div>
-                        <div class="badge badge-ghost opacity-50">Real-time</div>
+                        <div class="badge badge-soft badge-info badge-sm font-bold uppercase tracking-tighter">Real-time</div>
                     </div>
                     <div class="text-4xl font-black tracking-tighter mb-1" id="cpu-load">--</div>
-                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">CPU Usage</div>
-                    <progress class="progress progress-info w-full mt-4" value="0" max="100" id="cpu-progress"></progress>
+                    <div class="text-[10px] font-black opacity-40 uppercase tracking-widest">CPU Usage</div>
+                    <progress class="progress progress-info w-full mt-4 h-1.5" value="0" max="100" id="cpu-progress"></progress>
                 </div>
             </div>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
                 <div class="card-body p-6">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-3 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
-                            <i class="bi bi-memory text-2xl"></i>
+                            <i class="ri-ram-2-line text-2xl"></i>
                         </div>
-                        <div class="badge badge-ghost opacity-50">Memory</div>
+                        <div class="badge badge-soft badge-secondary badge-sm font-bold uppercase tracking-tighter">Memory</div>
                     </div>
                     <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="ram-usage">--</div>
-                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Memory Usage</div>
-                    <progress class="progress progress-secondary w-full mt-4" value="0" max="100" id="ram-progress"></progress>
+                    <div class="text-[10px] font-black opacity-40 uppercase tracking-widest">Memory Usage</div>
+                    <progress class="progress progress-secondary w-full mt-4 h-1.5" value="0" max="100" id="ram-progress"></progress>
                 </div>
             </div>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
                 <div class="card-body p-6">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-                            <i class="bi bi-hdd-network text-2xl"></i>
+                            <i class="ri-hard-drive-2-line text-2xl"></i>
                         </div>
-                        <div class="badge badge-ghost opacity-50">Storage</div>
+                        <div class="badge badge-soft badge-success badge-sm font-bold uppercase tracking-tighter">Storage</div>
                     </div>
                     <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="disk-usage">--</div>
-                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">Disk Space</div>
-                    <progress class="progress progress-success w-full mt-4" value="0" max="100" id="disk-progress"></progress>
+                    <div class="text-[10px] font-black opacity-40 uppercase tracking-widest">Disk Space</div>
+                    <progress class="progress progress-success w-full mt-4 h-1.5" value="0" max="100" id="disk-progress"></progress>
                 </div>
             </div>
 
-            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all group">
+            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
                 <div class="card-body p-6">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-3 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
-                            <i class="bi bi-clock-history text-2xl"></i>
+                            <i class="ri-time-line text-2xl"></i>
                         </div>
-                        <div class="badge badge-ghost opacity-50">Uptime</div>
+                        <div class="badge badge-soft badge-warning badge-sm font-bold uppercase tracking-tighter">Uptime</div>
                     </div>
                     <div class="text-3xl font-black tracking-tighter mb-1 leading-none" id="uptime">--</div>
-                    <div class="text-sm font-bold opacity-50 uppercase tracking-widest">System Uptime</div>
+                    <div class="text-[10px] font-black opacity-40 uppercase tracking-widest">System Uptime</div>
                     <div class="flex gap-1 mt-6">
                         <div class="h-1 flex-1 bg-orange-500 rounded-full"></div>
                         <div class="h-1 flex-1 bg-orange-500 rounded-full"></div>
@@ -105,17 +103,17 @@
 
         <!-- Quick Links -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="https://discord.gg/UhuYKKK2uM" target="_blank" class="btn btn-lg bg-[#5865F2] hover:bg-[#4752C4] text-white border-none shadow-lg group">
-                <i class="fa fa-fw fa-support group-hover:rotate-12 transition-transform"></i> Discord Support
+            <a href="https://discord.gg/UhuYKKK2uM" target="_blank" class="btn btn-lg bg-[#5865F2] hover:bg-[#4752C4] text-white border-none shadow-xl group rounded-2xl">
+                <i class="ri-discord-fill text-xl group-hover:rotate-12 transition-transform"></i> Discord Support
             </a>
-            <a href="https://bluedactyl.dev" target="_blank" class="btn btn-lg btn-primary shadow-lg group">
-                <i class="fa fa-fw fa-book group-hover:scale-110 transition-transform"></i> Documentation
+            <a href="https://bluedactyl.dev" target="_blank" class="btn btn-lg btn-primary shadow-xl group rounded-2xl">
+                <i class="ri-book-read-line text-xl group-hover:scale-110 transition-transform"></i> Documentation
             </a>
-            <a href="https://github.com/pyrohost/bluedactyl" target="_blank" class="btn btn-lg btn-neutral shadow-lg group">
-                <i class="fa fa-fw fa-github group-hover:rotate-12 transition-transform"></i> GitHub Repository
+            <a href="https://github.com/brickerium/bluedactyl" target="_blank" class="btn btn-lg btn-neutral shadow-xl group rounded-2xl border border-base-content/10">
+                <i class="ri-github-fill text-xl group-hover:rotate-12 transition-transform"></i> GitHub Repo
             </a>
-            <a href="{{ $version->getDonations() }}" target="_blank" class="btn btn-lg btn-success shadow-lg group">
-                <i class="fa fa-fw fa-heart group-hover:scale-125 transition-transform text-red-400"></i> Support Project
+            <a href="{{ $version->getDonations() }}" target="_blank" class="btn btn-lg btn-success shadow-xl group rounded-2xl">
+                <i class="ri-heart-fill text-xl group-hover:scale-125 transition-transform text-red-400"></i> Support Project
             </a>
         </div>
     </div>
