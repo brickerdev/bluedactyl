@@ -5,345 +5,540 @@
 @endsection
 
 @section('content-header')
-    <h1>Create Server<small>Add a new server to the panel.</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ route('admin.index') }}">Admin</a></li>
-        <li><a href="{{ route('admin.servers') }}">Servers</a></li>
-        <li class="active">Create Server</li>
-    </ol>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter uppercase">Create Server</h1>
+            <p class="text-base-content/60 text-sm">Add a new server to the panel.</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ route('admin.index') }}">Admin</a></li>
+                <li><a href="{{ route('admin.servers') }}">Servers</a></li>
+                <li class="text-primary font-bold">Create Server</li>
+            </ul>
+        </div>
+    </div>
 @endsection
 
 @section('content')
-<form action="{{ route('admin.servers.new') }}" method="POST">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Core Details</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="pName">Server Name</label>
-                            <input type="text" class="form-control" id="pName" name="name" value="{{ old('name') }}" placeholder="Server Name">
-                            <p class="small text-muted no-margin">Character limits: <code>a-z A-Z 0-9 _ - .</code> and <code>[Space]</code>.</p>
+    <form action="{{ route('admin.servers.new') }}" method="POST">
+        <div class="grid grid-cols-1 gap-6">
+            {{-- Core Details --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-information-line text-primary text-xl"></i>
                         </div>
-
-                        <div class="form-group">
-                            <label for="pUserId">Server Owner</label>
-                            <select id="pUserId" name="owner_id" class="form-control" style="padding-left:0;"></select>
-                            <p class="small text-muted no-margin">Email address of the Server Owner.</p>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Core Details</h3>
+                            <p class="text-xs text-base-content/50 italic">Basic identity and ownership settings for the
+                                server.</p>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="pDescription" class="control-label">Server Description</label>
-                            <textarea id="pDescription" name="description" rows="3" class="form-control">{{ old('description') }}</textarea>
-                            <p class="text-muted small">A brief description of this server.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Server Name</span>
+                            </label>
+                            <input type="text" class="input input-bordered focus:input-primary w-full transition-all"
+                                id="pName" name="name" value="{{ old('name') }}" placeholder="Server Name">
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Character limits:
+                                    <code>a-z A-Z 0-9 _ - .</code> and <code>[Space]</code>.</span>
+                            </label>
                         </div>
 
-                        <div class="form-group">
-                            <div class="checkbox checkbox-primary no-margin-bottom">
-                                <input id="pStartOnCreation" name="start_on_completion" type="checkbox" {{ \Pterodactyl\Helpers\Utilities::checked('start_on_completion', 1) }} />
-                                <label for="pStartOnCreation" class="strong">Start Server when Installed</label>
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Server Description</span>
+                            </label>
+                            <textarea id="pDescription" name="description" rows="3"
+                                class="textarea textarea-bordered focus:textarea-primary w-full transition-all">{{ old('description') }}</textarea>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">A brief description of this server.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Server Owner</span>
+                            </label>
+                            <select id="pUserId" name="owner_id" class="w-full"></select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Email address of the Server Owner.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input id="pStartOnCreation" name="start_on_completion" type="checkbox"
+                                    class="checkbox checkbox-primary"
+                                    {{ \Pterodactyl\Helpers\Utilities::checked('start_on_completion', 1) }} />
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Start Server when
+                                    Installed</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Allocation Management --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6 relative">
+                    <div class="overlay absolute inset-0 bg-base-200/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl"
+                        id="allocationLoader" style="display:none;">
+                        <span class="loading loading-spinner loading-lg text-primary"></span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-router-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Allocation Management</h3>
+                            <p class="text-xs text-base-content/50 italic">Control how this server connects to the network.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Node</span>
+                            </label>
+                            <select name="node_id" id="pNodeId" class="w-full">
+                                @foreach ($locations as $location)
+                                    <optgroup label="{{ $location->long }} ({{ $location->short }})">
+                                        @foreach ($location->nodes as $node)
+                                            <option value="{{ $node->id }}"
+                                                @if ($location->id === old('location_id')) selected @endif>{{ $node->name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">The node which this server will be
+                                    deployed to.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Default Allocation</span>
+                            </label>
+                            <select id="pAllocation" name="allocation_id" class="w-full"></select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">The main allocation that will be assigned
+                                    to this server.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Additional
+                                    Allocation(s)</span>
+                            </label>
+                            <select id="pAllocationAdditional" name="allocation_additional[]" class="w-full"
+                                multiple></select>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">Additional allocations to assign to this
+                                    server on creation.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Application Feature Limits --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-equalizer-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Application Feature Limits</h3>
+                            <p class="text-xs text-base-content/50 italic">Limits for databases, allocations, and backups.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Database Limit</span>
+                            </label>
+                            <input type="text" id="pDatabaseLimit" name="database_limit"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('database_limit') }}" placeholder="Leave blank for unlimited" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Total databases allowed.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Allocation Limit</span>
+                            </label>
+                            <input type="text" id="pAllocationLimit" name="allocation_limit"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('allocation_limit') }}" placeholder="Leave blank for unlimited" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Total allocations allowed.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Backup Limit</span>
+                            </label>
+                            <input type="text" id="pBackupLimit" name="backup_limit"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('backup_limit') }}" placeholder="Leave blank for unlimited" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Total backups allowed.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Backup Storage
+                                    Limit</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pBackupStorageLimit" name="backup_storage_limit"
+                                    data-multiplicator="true"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('backup_storage_limit') }}" placeholder="Leave blank for unlimited" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">MiB</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Total storage for backups.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Resource Management --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-cpu-line text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Resource Management</h3>
+                            <p class="text-xs text-base-content/50 italic">Configure CPU, Memory, and Disk limits.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">CPU Limit</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pCPU" name="cpu"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('cpu', 0) }}" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">%</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">0 for unlimited. Threads *
+                                    100.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">CPU Pinning</span>
+                            </label>
+                            <input type="text" id="pThreads" name="threads"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('threads') }}" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Advanced: Specific CPU threads
+                                    (e.g. 0,1,3).</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Memory</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pMemory" name="memory"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('memory') }}" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">MiB</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Maximum memory allowed. 0 for
+                                    unlimited.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Overhead Memory</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pOverheadMemory" name="overhead_memory"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('overhead_memory', 0) }}" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">MiB</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Additional memory for the
+                                    container.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Swap</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pSwap" name="swap"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('swap', 0) }}" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">MiB</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">0 to disable, -1 for
+                                    unlimited.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Disk Space</span>
+                            </label>
+                            <div class="join w-full">
+                                <input type="text" id="pDisk" name="disk"
+                                    class="input input-bordered focus:input-primary join-item w-full transition-all"
+                                    value="{{ old('disk') }}" />
+                                <span
+                                    class="join-item btn btn-disabled bg-base-300 border-base-300 text-base-content/50">MiB</span>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">0 for unlimited disk usage.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Block IO Weight</span>
+                            </label>
+                            <input type="text" id="pIO" name="io"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                value="{{ old('io', 500) }}" />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">Advanced: IO performance
+                                    (10-1000).</span>
+                            </label>
+                        </div>
+
+                        <div class="flex flex-col gap-4">
+                            <div class="form-control">
+                                <label class="label cursor-pointer justify-start gap-4">
+                                    <input type="checkbox" id="pOomDisabled" name="oom_disabled" value="0"
+                                        class="checkbox checkbox-primary"
+                                        {{ \Pterodactyl\Helpers\Utilities::checked('oom_disabled', 0) }} />
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Enable OOM
+                                        Killer</span>
+                                </label>
+                                <span class="text-xs text-base-content/50 ml-10">Terminates the server if it breaches memory
+                                    limits.</span>
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label cursor-pointer justify-start gap-4">
+                                    <input type="checkbox" id="pExcludeFromResourceCalculation"
+                                        name="exclude_from_resource_calculation" value="1"
+                                        class="checkbox checkbox-primary"
+                                        {{ \Pterodactyl\Helpers\Utilities::checked('exclude_from_resource_calculation', 0) }} />
+                                    <span class="label-text font-bold uppercase tracking-wide text-xs">Exclude from Resource
+                                        Calculation</span>
+                                </label>
+                                <span class="text-xs text-base-content/50 ml-10">Exclude from node resource
+                                    calculations.</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="overlay" id="allocationLoader" style="display:none;"><i class="fa fa-refresh fa-spin"></i></div>
-                <div class="box-header with-border">
-                    <h3 class="box-title">Allocation Management</h3>
-                </div>
+            {{-- Nest & Docker Configuration --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <i class="ri-folder-zip-line text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold uppercase tracking-tight">Nest Configuration</h3>
+                                <p class="text-xs text-base-content/50 italic">Select the Nest and Egg for this server.</p>
+                            </div>
+                        </div>
 
-                <div class="box-body row">
-                    <div class="form-group col-sm-4">
-                        <label for="pNodeId">Node</label>
-                        <select name="node_id" id="pNodeId" class="form-control">
-                            @foreach($locations as $location)
-                                <optgroup label="{{ $location->long }} ({{ $location->short }})">
-                                @foreach($location->nodes as $node)
-
-                                <option value="{{ $node->id }}"
-                                    @if($location->id === old('location_id')) selected @endif
-                                >{{ $node->name }}</option>
-
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Nest</span>
+                            </label>
+                            <select id="pNestId" name="nest_id" class="w-full">
+                                @foreach ($nests as $nest)
+                                    <option value="{{ $nest->id }}"
+                                        @if ($nest->id === old('nest_id')) selected="selected" @endif>{{ $nest->name }}
+                                    </option>
                                 @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
+                            </select>
+                        </div>
 
-                        <p class="small text-muted no-margin">The node which this server will be deployed to.</p>
+                        <div class="form-control w-full mb-4">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Egg</span>
+                            </label>
+                            <select id="pEggId" name="egg_id" class="w-full"></select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" id="pSkipScripting" name="skip_scripts" value="1"
+                                    class="checkbox checkbox-primary"
+                                    {{ \Pterodactyl\Helpers\Utilities::checked('skip_scripts', 0) }} />
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Skip Egg Install
+                                    Script</span>
+                            </label>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="form-group col-sm-4">
-                        <label for="pAllocation">Default Allocation</label>
-                        <select id="pAllocation" name="allocation_id" class="form-control"></select>
-                        <p class="small text-muted no-margin">The main allocation that will be assigned to this server.</p>
-                    </div>
+                <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                    <div class="card-body p-6">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <i class="ri-docker-line text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold uppercase tracking-tight">Docker Configuration</h3>
+                                <p class="text-xs text-base-content/50 italic">Configure the Docker image for this server.
+                                </p>
+                            </div>
+                        </div>
 
-                    <div class="form-group col-sm-4">
-                        <label for="pAllocationAdditional">Additional Allocation(s)</label>
-                        <select id="pAllocationAdditional" name="allocation_additional[]" class="form-control" multiple></select>
-                        <p class="small text-muted no-margin">Additional allocations to assign to this server on creation.</p>
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text font-bold uppercase tracking-wide text-xs">Docker Image</span>
+                            </label>
+                            <select id="pDefaultContainer" name="image" class="w-full mb-4"></select>
+                            <input id="pDefaultContainerCustom" name="custom_image" value="{{ old('custom_image') }}"
+                                class="input input-bordered focus:input-primary w-full transition-all"
+                                placeholder="Or enter a custom image..." />
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50 text-xs">The default Docker image used to
+                                    run this server.</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="overlay" id="allocationLoader" style="display:none;"><i class="fa fa-refresh fa-spin"></i></div>
-                <div class="box-header with-border">
-                    <h3 class="box-title">Application Feature Limits</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-6">
-                        <label for="pDatabaseLimit" class="control-label">Database Limit</label>
+            {{-- Startup Configuration --}}
+            <div class="card bg-base-200/50 border border-base-300 shadow-xl backdrop-blur-md">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="ri-terminal-box-line text-primary text-xl"></i>
+                        </div>
                         <div>
-                            <input type="text" id="pDatabaseLimit" name="database_limit" class="form-control" value="{{ old('database_limit') }}" placeholder="Leave blank for unlimited"/>
+                            <h3 class="text-xl font-bold uppercase tracking-tight">Startup Configuration</h3>
+                            <p class="text-xs text-base-content/50 italic">Configure the startup command and variables.</p>
                         </div>
-                        <p class="text-muted small">The total number of databases a user is allowed to create for this server. Leave blank for unlimited, set to 0 to disable.</p>
                     </div>
-                    <div class="form-group col-xs-6">
-                        <label for="pAllocationLimit" class="control-label">Allocation Limit</label>
-                        <div>
-                            <input type="text" id="pAllocationLimit" name="allocation_limit" class="form-control" value="{{ old('allocation_limit') }}" placeholder="Leave blank for unlimited"/>
-                        </div>
-                        <p class="text-muted small">The total number of allocations a user is allowed to create for this server. Leave blank for unlimited, set to 0 to disable.</p>
+
+                    <div class="form-control w-full mb-8">
+                        <label class="label">
+                            <span class="label-text font-bold uppercase tracking-wide text-xs">Startup Command</span>
+                        </label>
+                        <input type="text" id="pStartup" name="startup" value="{{ old('startup') }}"
+                            class="input input-bordered focus:input-primary w-full transition-all" />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/50 text-xs">Available substitutes:
+                                <code>@{{ SERVER_MEMORY }}</code>, <code>@{{ SERVER_IP }}</code>, and
+                                <code>@{{ SERVER_PORT }}</code>.</span>
+                        </label>
                     </div>
-                    <div class="form-group col-xs-6">
-                        <label for="pBackupLimit" class="control-label">Backup Limit</label>
-                        <div>
-                            <input type="text" id="pBackupLimit" name="backup_limit" class="form-control" value="{{ old('backup_limit') }}" placeholder="Leave blank for unlimited"/>
-                        </div>
-                        <p class="text-muted small">The total number of backups that can be created for this server. Leave blank for unlimited, set to 0 to disable.</p>
-                    </div>
-                    <div class="form-group col-xs-6">
-                        <label for="pBackupStorageLimit" class="control-label">Backup Storage Limit</label>
-                        <div class="input-group">
-                            <input type="text" id="pBackupStorageLimit" name="backup_storage_limit" data-multiplicator="true" class="form-control" value="{{ old('backup_storage_limit') }}" placeholder="Leave blank for unlimited"/>
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-                        <p class="text-muted small">The total storage space that can be used for backups. Leave blank for unlimited storage.</p>
+
+                    <div class="divider uppercase font-bold text-xs opacity-50">Service Variables</div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="appendVariablesTo"></div>
+
+                    <div class="card-actions justify-end mt-12 pt-8 border-t border-base-300">
+                        {!! csrf_field() !!}
+                        <button type="submit" class="btn btn-primary px-12 font-bold uppercase tracking-wider">
+                            <i class="ri-add-line mr-2"></i>
+                            Create Server
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Resource Management</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-6">
-                        <label for="pCPU">CPU Limit</label>
-
-                        <div class="input-group">
-                            <input type="text" id="pCPU" name="cpu" class="form-control" value="{{ old('cpu', 0) }}" />
-                            <span class="input-group-addon">%</span>
-                        </div>
-
-                        <p class="text-muted small">If you do not want to limit CPU usage, set the value to <code>0</code>. To determine a value, take the number of threads and multiply it by 100. For example, on a quad core system without hyperthreading <code>(4 * 100 = 400)</code> there is <code>400%</code> available. To limit a server to using half of a single thread, you would set the value to <code>50</code>. To allow a server to use up to two threads, set the value to <code>200</code>.<p>
-                    </div>
-
-                    <div class="form-group col-xs-6">
-                        <label for="pThreads">CPU Pinning</label>
-
-                        <div>
-                            <input type="text" id="pThreads" name="threads" class="form-control" value="{{ old('threads') }}" />
-                        </div>
-
-                        <p class="text-muted small"><strong>Advanced:</strong> Enter the specific CPU threads that this process can run on, or leave blank to allow all threads. This can be a single number, or a comma separated list. Example: <code>0</code>, <code>0-1,3</code>, or <code>0,1,3,4</code>.</p>
-                    </div>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-6">
-                        <label for="pMemory">Memory</label>
-
-                        <div class="input-group">
-                            <input type="text" id="pMemory" name="memory" class="form-control" value="{{ old('memory') }}" />
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-
-                        <p class="text-muted small">The maximum amount of memory allowed for this container. Setting this to <code>0</code> will allow unlimited memory in a container.</p>
-                    </div>
-
-                    <div class="form-group col-xs-6">
-                        <label for="pOverheadMemory">Overhead Memory</label>
-
-                        <div class="input-group">
-                            <input type="text" id="pOverheadMemory" name="overhead_memory" class="form-control" value="{{ old('overhead_memory', 0) }}" />
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-
-                        <p class="text-muted small">Additional memory allocated to the container that doesn't go to the SERVER_MEMORY variable. Setting to <code>0</code> disables overhead memory.</p>
-                    </div>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-6">
-                        <label for="pSwap">Swap</label>
-
-                        <div class="input-group">
-                            <input type="text" id="pSwap" name="swap" class="form-control" value="{{ old('swap', 0) }}" />
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-
-                        <p class="text-muted small">Setting this to <code>0</code> will disable swap space on this server. Setting to <code>-1</code> will allow unlimited swap.</p>
-                    </div>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-6">
-                        <label for="pDisk">Disk Space</label>
-
-                        <div class="input-group">
-                            <input type="text" id="pDisk" name="disk" class="form-control" value="{{ old('disk') }}" />
-                            <span class="input-group-addon">MiB</span>
-                        </div>
-
-                        <p class="text-muted small">This server will not be allowed to boot if it is using more than this amount of space. If a server goes over this limit while running it will be safely stopped and locked until enough space is available. Set to <code>0</code> to allow unlimited disk usage.</p>
-                    </div>
-
-                    <div class="form-group col-xs-6">
-                        <label for="pIO">Block IO Weight</label>
-
-                        <div>
-                            <input type="text" id="pIO" name="io" class="form-control" value="{{ old('io', 500) }}" />
-                        </div>
-
-                        <p class="text-muted small"><strong>Advanced</strong>: The IO performance of this server relative to other <em>running</em> containers on the system. Value should be between <code>10</code> and <code>1000</code>. Please see <a href="https://docs.docker.com/engine/reference/run/#block-io-bandwidth-blkio-constraint" target="_blank">this documentation</a> for more information about it.</p>
-                    </div>
-                    <div class="form-group col-xs-12">
-                        <div class="checkbox checkbox-primary no-margin-bottom">
-                            <input type="checkbox" id="pOomDisabled" name="oom_disabled" value="0" {{ \Pterodactyl\Helpers\Utilities::checked('oom_disabled', 0) }} />
-                            <label for="pOomDisabled" class="strong">Enable OOM Killer</label>
-                        </div>
-
-                        <p class="small text-muted no-margin">Terminates the server if it breaches the memory limits. Enabling OOM killer may cause server processes to exit unexpectedly.</p>
-                    </div>
-                    <div class="form-group col-xs-12">
-                        <div class="checkbox checkbox-primary no-margin-bottom">
-                            <input type="checkbox" id="pExcludeFromResourceCalculation" name="exclude_from_resource_calculation" value="1" {{ \Pterodactyl\Helpers\Utilities::checked('exclude_from_resource_calculation', 0) }} />
-                            <label for="pExcludeFromResourceCalculation" class="strong">Exclude from Resource Calculation</label>
-                        </div>
-
-                        <p class="small text-muted no-margin">When enabled, this server will not be included in resource calculations when provisioning new servers onto this node. Useful for testing or development servers.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Nest Configuration</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-12">
-                        <label for="pNestId">Nest</label>
-
-                        <select id="pNestId" name="nest_id" class="form-control">
-                            @foreach($nests as $nest)
-                                <option value="{{ $nest->id }}"
-                                    @if($nest->id === old('nest_id'))
-                                        selected="selected"
-                                    @endif
-                                >{{ $nest->name }}</option>
-                            @endforeach
-                        </select>
-
-                        <p class="small text-muted no-margin">Select the Nest that this server will be grouped under.</p>
-                    </div>
-
-                    <div class="form-group col-xs-12">
-                        <label for="pEggId">Egg</label>
-                        <select id="pEggId" name="egg_id" class="form-control"></select>
-                        <p class="small text-muted no-margin">Select the Egg that will define how this server should operate.</p>
-                    </div>
-                    <div class="form-group col-xs-12">
-                        <div class="checkbox checkbox-primary no-margin-bottom">
-                            <input type="checkbox" id="pSkipScripting" name="skip_scripts" value="1" {{ \Pterodactyl\Helpers\Utilities::checked('skip_scripts', 0) }} />
-                            <label for="pSkipScripting" class="strong">Skip Egg Install Script</label>
-                        </div>
-
-                        <p class="small text-muted no-margin">If the selected Egg has an install script attached to it, the script will run during the install. If you would like to skip this step, check this box.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Docker Configuration</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-12">
-                        <label for="pDefaultContainer">Docker Image</label>
-                        <select id="pDefaultContainer" name="image" class="form-control"></select>
-                        <input id="pDefaultContainerCustom" name="custom_image" value="{{ old('custom_image') }}" class="form-control" placeholder="Or enter a custom image..." style="margin-top:1rem"/>
-                        <p class="small text-muted no-margin">This is the default Docker image that will be used to run this server. Select an image from the dropdown above, or enter a custom image in the text field above.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Startup Configuration</h3>
-                </div>
-
-                <div class="box-body row">
-                    <div class="form-group col-xs-12">
-                        <label for="pStartup">Startup Command</label>
-                        <input type="text" id="pStartup" name="startup" value="{{ old('startup') }}" class="form-control" />
-                        <p class="small text-muted no-margin">The following data substitutes are available for the startup command: <code>@{{SERVER_MEMORY}}</code>, <code>@{{SERVER_IP}}</code>, and <code>@{{SERVER_PORT}}</code>. They will be replaced with the allocated memory, server IP, and server port respectively.</p>
-                    </div>
-                </div>
-
-                <div class="box-header with-border" style="margin-top:-10px;">
-                    <h3 class="box-title">Service Variables</h3>
-                </div>
-
-                <div class="box-body row" id="appendVariablesTo"></div>
-
-                <div class="box-footer">
-                    {!! csrf_field() !!}
-                    <input type="submit" class="btn btn-success pull-right" value="Create Server" />
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
+    </form>
 @endsection
 
 @section('footer-scripts')
     @parent
     {!! Theme::js('vendor/lodash/lodash.js') !!}
+
+    <style>
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            @apply bg-base-100 border-base-300 rounded-lg h-12 flex items-center transition-all;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            @apply border-primary ring-1 ring-primary;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            @apply bg-primary text-primary-content border-none rounded-md px-2 py-0.5 text-xs font-bold uppercase tracking-wide mt-1;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            @apply text-primary-content hover:text-white mr-1;
+        }
+
+        .select2-dropdown {
+            @apply bg-base-100 border-base-300 rounded-lg shadow-2xl overflow-hidden;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            @apply bg-primary text-primary-content;
+        }
+
+        .select2-results__option {
+            @apply text-base-content px-4 py-2;
+        }
+
+        .select2-results__group {
+            @apply font-black text-[10px] uppercase tracking-widest text-base-content/40 px-3 py-2 bg-base-300/20;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            @apply text-base-content leading-tight;
+        }
+    </style>
 
     <script type="application/javascript">
         // Persist 'Service Variables'
@@ -360,7 +555,7 @@
                     @endforeach
                 @endif
             @endif
-            @if(old('image'))
+            @if (old('image'))
                 $('#pDefaultContainer').val('{{ old('image') }}');
             @endif
         }
@@ -371,13 +566,16 @@
 
     <script type="application/javascript">
         $(document).ready(function() {
+            // Initialize Select2 for all standard selects that need it
+            $('#pNodeId, #pNestId, #pEggId, #pDefaultContainer, #pAllocation, #pAllocationAdditional').select2();
+
             // Persist 'Server Owner' select2
             @if (old('owner_id'))
                 $.ajax({
                     url: '/admin/users/accounts.json?user_id={{ old('owner_id') }}',
                     dataType: 'json',
-                }).then(function (data) {
-                    initUserIdSelect([ data ]);
+                }).then(function(data) {
+                    initUserIdSelect([data]);
                 });
             @else
                 initUserIdSelect();
@@ -399,7 +597,7 @@
                     const additional_allocations = [];
 
                     @for ($i = 0; $i < count(old('allocation_additional')); $i++)
-                        additional_allocations.push('{{ old('allocation_additional.'.$i)}}');
+                        additional_allocations.push('{{ old('allocation_additional.' . $i) }}');
                     @endfor
 
                     $('#pAllocationAdditional').val(additional_allocations).change();
@@ -421,6 +619,4 @@
             // END Persist 'Nest' select2
         });
     </script>
-
-
 @endsection
